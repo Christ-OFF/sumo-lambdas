@@ -25,8 +25,8 @@
 
         <!-- Domain -->
         <dependency>
-            <groupId>com.christoff.apps</groupId>
-            <artifactId>sumolambdasdomain</artifactId>
+            <groupId>com.christoff.apps.sumo</groupId>
+            <artifactId>lambdasdomain</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 

@@ -6,7 +6,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.christoff.apps.sumolambda.rikishisread.domain.ExtractInfo;
+import com.christoff.apps.sumo.lambda.domain.ExtractInfo;
 import com.christoff.apps.sumolambda.rikishisread.pojos.ExtractInfoRequest;
 import org.apache.log4j.Logger;
 

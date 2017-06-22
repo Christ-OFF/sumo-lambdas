@@ -1,7 +1,7 @@
 package com.christoff.apps.scrappers;
 
-import com.christoff.apps.sumolambda.rikishisread.domain.DomainObject;
-import com.christoff.apps.sumolambda.rikishisread.domain.Rikishi;
+import com.christoff.apps.sumo.lambda.domain.DomainObject;
+import com.christoff.apps.sumo.lambda.domain.Rikishi;
 import com.christoff.apps.utils.FilterRank;
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;

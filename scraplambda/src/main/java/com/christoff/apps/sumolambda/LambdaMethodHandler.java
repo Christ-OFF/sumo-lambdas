@@ -6,8 +6,8 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.christoff.apps.scrappers.IdAndUrl;
 import com.christoff.apps.scrappers.RikishiScrapper;
-import com.christoff.apps.sumolambda.rikishisread.domain.ExtractInfo;
-import com.christoff.apps.sumolambda.rikishisread.domain.Rikishi;
+import com.christoff.apps.sumo.lambda.domain.ExtractInfo;
+import com.christoff.apps.sumo.lambda.domain.Rikishi;
 import org.apache.log4j.Logger;
 
 import java.time.LocalDate;
@@ -39,7 +39,6 @@ public class LambdaMethodHandler {
      * @return "DONE" or ... this result is not used. It's just useful to get it on AWS Console
      */
     public void handleRequest(Context context) {
-        boolean status = true;
         // Get Env parameters : Those parameters are set in AWS Lambda console
         String baseurl = System.getenv("baseurl");
         String imageurl = System.getenv("imageurl");

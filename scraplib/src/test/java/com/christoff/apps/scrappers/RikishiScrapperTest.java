@@ -1,6 +1,6 @@
 package com.christoff.apps.scrappers;
 
-import com.christoff.apps.sumolambda.rikishisread.domain.Rikishi;
+import com.christoff.apps.sumo.lambda.domain.Rikishi;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
@@ -162,7 +162,9 @@ public class RikishiScrapperTest {
         assertEquals(expected.getRealName(),result.getRealName());
         if (expected.getBirthDate()==null){
             assertNull(result.getBirthDate());
-        } else assertEquals(expected.getBirthDate().toString(), result.getBirthDate().toString());
+        } else {
+            assertEquals(expected.getBirthDate(), result.getBirthDate());
+        }
         assertEquals("Heya",expected.getHeya(),result.getHeya());
         assertEquals("Name",expected.getName(),result.getName());
         assertEquals(expected.getShusshin(),result.getShusshin());

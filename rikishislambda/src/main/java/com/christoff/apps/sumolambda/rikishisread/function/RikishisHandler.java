@@ -6,15 +6,16 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.christoff.apps.sumolambda.rikishisread.domain.Rikishi;
+import com.christoff.apps.sumo.lambda.domain.Rikishi;
 import com.christoff.apps.sumolambda.rikishisread.pojos.RikishisRequest;
-import com.christoff.apps.sumolambda.rikishisread.pojos.RikishisResponse;
 import org.apache.log4j.Logger;
+
+import java.util.List;
 
 /**
  * This is the entry point of lambda processing
  */
-public class RikishisHandler implements RequestHandler<RikishisRequest, RikishisResponse> {
+public class RikishisHandler implements RequestHandler<RikishisRequest, List<Rikishi>> {
 
     static final Logger LOGGER = Logger.getLogger(RikishisHandler.class);
 
@@ -29,13 +30,12 @@ public class RikishisHandler implements RequestHandler<RikishisRequest, Rikishis
      * @param context
      * @return "DONE" or ... this result is not used. It's just useful to get it on AWS Console
      */
-    public RikishisResponse handleRequest(RikishisRequest input, Context context){
+    public List<Rikishi> handleRequest(RikishisRequest input, Context context){
         initDynamoDbClient();
         //
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
-        RikishisResponse result = new RikishisResponse();
-        result.setRikishis(mapper.scan(Rikishi.class, scanExpression));
-        LOGGER.info("Got " + result.getRikishis().size() + " rikishis");
+        List<Rikishi> result = mapper.scan(Rikishi.class, scanExpression);
+        LOGGER.info("Got " + result.size() + " rikishis");
         return result;
     }
 

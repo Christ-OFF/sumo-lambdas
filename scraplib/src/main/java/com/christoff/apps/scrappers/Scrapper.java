@@ -1,6 +1,6 @@
 package com.christoff.apps.scrappers;
 
-import com.christoff.apps.sumolambda.rikishisread.domain.DomainObject;
+import com.christoff.apps.sumo.lambda.domain.DomainObject;
 
 import java.util.List;
 
