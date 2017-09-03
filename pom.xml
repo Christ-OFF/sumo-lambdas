@@ -12,11 +12,12 @@
     <description>This is the root of all lambdas projets</description>
 
     <modules>
-        <module>lambdadomain</module>
+        <module>lambdas-common</module>
+        <module>lambdas-domain</module>
         <module>scraplib</module>
-        <module>scraplambda</module>
-        <module>extractinfolambda</module>
-        <module>rikishislambda</module>
+        <module>lambda-scrap</module>
+        <module>lambda-extractinfo</module>
+        <module>lambda-rikishis</module>
     </modules>
 
     <dependencyManagement>

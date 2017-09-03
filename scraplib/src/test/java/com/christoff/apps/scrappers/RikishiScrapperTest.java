@@ -146,7 +146,7 @@ public class RikishiScrapperTest {
         should_scrap_expected_rikishi("terunofuji_not_born.html",terunofuji);
     }
 
-    private void should_scrap_expected_rikishi(String resourceName, Rikishi expected) throws IOException, ParseException {
+    private void should_scrap_expected_rikishi(String resourceName, Rikishi expected) throws IOException {
         // Mock
         URL url = Resources.getResource(resourceName);
         String body = Resources.toString(url, Charsets.UTF_8);
