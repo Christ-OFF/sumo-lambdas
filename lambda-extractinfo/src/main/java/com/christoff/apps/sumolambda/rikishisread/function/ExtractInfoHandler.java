@@ -27,9 +27,8 @@ public class ExtractInfoHandler extends LambdaBase implements RequestHandler<Ext
      * The main function is for local usage only
      */
     public static void main(String[] args) {
-        ExtractInfoRequest localRequest = new ExtractInfoRequest();
         ExtractInfoHandler localHandler = new ExtractInfoHandler();
-        ExtractInfo result = localHandler.handleRequest(localRequest, null);
+        ExtractInfo result = localHandler.handleRequest(null, buildLocalContext());
         if (result != null) {
             LOGGER.info("SUCCESS " + result.toString());
         } else {
@@ -45,7 +44,7 @@ public class ExtractInfoHandler extends LambdaBase implements RequestHandler<Ext
      * @return "DONE" or ... this result is not used. It's just useful to get it on AWS Console
      */
     public ExtractInfo handleRequest(ExtractInfoRequest input, Context context) {
-        this.mapper = new DynamoDBMapper( getDynamoDbClient( context == null));
+        this.mapper = new DynamoDBMapper( getDynamoDbClient( context ));
         //
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
         List<ExtractInfo> result = mapper.scan(ExtractInfo.class, scanExpression);

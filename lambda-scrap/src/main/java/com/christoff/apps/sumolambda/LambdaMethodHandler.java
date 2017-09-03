@@ -36,7 +36,7 @@ public class LambdaMethodHandler extends LambdaBase {
      */
     public static void main(String[] args) {
         LambdaMethodHandler lmh = new LambdaMethodHandler();
-        lmh.handleRequest(null);
+        lmh.handleRequest(buildLocalContext());
     }
 
     /**
@@ -55,7 +55,7 @@ public class LambdaMethodHandler extends LambdaBase {
         } else {
             // Init
             LOGGER.info("Entering Sumo Scrapping process...for " + baseurl);
-            this.mapper = new DynamoDBMapper( getDynamoDbClient( context == null));
+            this.mapper = new DynamoDBMapper( getDynamoDbClient( context ));
             // Rikishis
             if (extractInfoOnly != null && !extractInfoOnly.isEmpty() && !Boolean.valueOf(extractInfoOnly)) {
                 boolean result = handleRikishis(baseurl, listurl);

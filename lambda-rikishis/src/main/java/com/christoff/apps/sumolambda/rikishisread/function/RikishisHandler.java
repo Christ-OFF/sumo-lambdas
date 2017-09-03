@@ -27,9 +27,8 @@ public class RikishisHandler extends LambdaBase implements RequestHandler<Rikish
      * The main function is for local usage only
      */
     public static void main(String[] args) {
-        RikishisRequest localRequest = new RikishisRequest();
         RikishisHandler localHandler = new RikishisHandler();
-        List<Rikishi> result = localHandler.handleRequest(localRequest, null);
+        List<Rikishi> result = localHandler.handleRequest(null, buildLocalContext());
         if (result != null) {
             LOGGER.info("SUCCESS ");
             result.forEach(rikishi -> LOGGER.info(rikishi.toString()));
@@ -45,7 +44,7 @@ public class RikishisHandler extends LambdaBase implements RequestHandler<Rikish
      * @return "DONE" or ... this result is not used. It's just useful to get it on AWS Console
      */
     public List<Rikishi> handleRequest(RikishisRequest input, Context context){
-        this.mapper = new DynamoDBMapper( getDynamoDbClient( context == null ));
+        this.mapper = new DynamoDBMapper( getDynamoDbClient( context ));
         //
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
         List<Rikishi> result = mapper.scan(Rikishi.class, scanExpression);
