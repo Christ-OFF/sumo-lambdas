@@ -19,11 +19,6 @@ public class ExtractInfoHandler extends LambdaBase implements RequestHandler<Ext
     private static final Logger LOGGER = Logger.getLogger(ExtractInfoHandler.class);
 
     /**
-     * To retrieve annotated Objects
-     */
-    private DynamoDBMapper mapper = null;
-
-    /**
      * The main function is for local usage only
      */
     public static void main(String[] args) {
@@ -44,7 +39,7 @@ public class ExtractInfoHandler extends LambdaBase implements RequestHandler<Ext
      * @return "DONE" or ... this result is not used. It's just useful to get it on AWS Console
      */
     public ExtractInfo handleRequest(ExtractInfoRequest input, Context context) {
-        this.mapper = new DynamoDBMapper( getDynamoDbClient( context ));
+        DynamoDBMapper mapper = new DynamoDBMapper(getDynamoDbClient(context));
         //
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
         List<ExtractInfo> result = mapper.scan(ExtractInfo.class, scanExpression);

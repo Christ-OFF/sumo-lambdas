@@ -19,11 +19,6 @@ public class RikishisHandler extends LambdaBase implements RequestHandler<Rikish
     private static final Logger LOGGER = Logger.getLogger(RikishisHandler.class);
 
     /**
-     * To retrieve annotated Objects
-     */
-    private DynamoDBMapper mapper = null;
-
-    /**
      * The main function is for local usage only
      */
     public static void main(String[] args) {
@@ -44,7 +39,7 @@ public class RikishisHandler extends LambdaBase implements RequestHandler<Rikish
      * @return "DONE" or ... this result is not used. It's just useful to get it on AWS Console
      */
     public List<Rikishi> handleRequest(RikishisRequest input, Context context){
-        this.mapper = new DynamoDBMapper( getDynamoDbClient( context ));
+        DynamoDBMapper mapper = new DynamoDBMapper(getDynamoDbClient(context));
         //
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
         List<Rikishi> result = mapper.scan(Rikishi.class, scanExpression);
