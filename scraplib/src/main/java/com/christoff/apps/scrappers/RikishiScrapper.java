@@ -4,6 +4,7 @@ import com.christoff.apps.sumo.lambda.domain.DomainObject;
 import com.christoff.apps.sumo.lambda.domain.Rikishi;
 import com.christoff.apps.utils.FilterRank;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -15,9 +16,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -118,7 +121,7 @@ public class RikishiScrapper implements Scrapper {
     }
 
     @Override
-    public DomainObject getDetail(IdAndUrl idAndUrl) {
+    public DomainObject getDetail(IdAndUrl idAndUrl, byte[] defaulIllustration) {
         try {
             Document mainPage = Jsoup.connect(idAndUrl.getUrl()).get();
             Elements rikishiData = mainPage.select(TABLE_RIKISHIDATA);
@@ -168,6 +171,17 @@ public class RikishiScrapper implements Scrapper {
             }
             // Rikishi is done . but we may exclude him
             if (FilterRank.includeRank(result.getRank())) {
+                // We are going to return it. So go for the picture
+                byte[] illustration = getIllustration(idAndUrl, defaulIllustration);
+                // Note from Amazon about binary fields :
+                // Source : http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-data-types
+                // Applications that work with Binary attributes must encode the data in Base64 format
+                // before sending it to DynamoDB.
+                // Upon receipt of the data, DynamoDB decodes it into an unsigned byte array
+                // and uses that as the length of the attribute.
+                byte[] illustrationBase64 = Base64.getEncoder().encode(illustration);
+                ByteBuffer buffer = ByteBuffer.wrap(illustrationBase64);
+                result.setPicture(buffer);
                 return result;
             } else {
                 LOGGER.warn("Excluding " + result.getId() + " because of rank");
@@ -179,40 +193,24 @@ public class RikishiScrapper implements Scrapper {
         }
     }
 
-    @Override
-    public byte[] getIllustration(IdAndUrl idAndUrl) {
-        String downloadUrl = baseUrl + imageUrl;
-        URL downloadURL;
+    /**
+     * Retrieve on image may unimplemented as pictures are not always available
+     * ex: yes for rikishis, no or maybe ate best for fights, bashos, ...
+     * @param idAndUrl the way we can get the image
+     * @param  defaultIllustration if impossaible to download we must return a default content
+     */
+    protected byte[] getIllustration(IdAndUrl idAndUrl, byte[] defaultIllustration) {
+        String downloadUrl = baseUrl + imageUrl + idAndUrl.getId() + IMAGE_EXTENSION;
         try {
-            downloadURL = new URL(downloadUrl + idAndUrl.getId() + IMAGE_EXTENSION);
-            return getImageBytes(downloadURL);
+            byte[] result = getImageBytes(new URL(downloadUrl));
+            if (result != null) {
+                LOGGER.debug("Sucessfully downloaded picture from " + downloadUrl);
+                return result;
+            }
         } catch (MalformedURLException e) {
             LOGGER.warn("Malformed Url for rikishi id " + idAndUrl.getId(), e);
         }
-        return new byte[0];
-    }
-
-    /**
-     * Load image bytes from the source website (so beware of exceptions)
-     *
-     * @param downloadURL is URL of the image
-     * @return the byte array of the image
-     */
-    private byte[] getImageBytes(URL downloadURL) {
-        try (InputStream in = new BufferedInputStream(downloadURL.openStream())) {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            byte[] buf = new byte[1024];
-            int n;
-            while (-1 != (n = in.read(buf))) {
-                out.write(buf, 0, n);
-            }
-            out.close();
-            in.close();
-            return out.toByteArray();
-        } catch (IOException ioe) {
-            LOGGER.warn("Unable to download image from " + downloadURL.toString());
-            return new byte[0];
-        }
+        return defaultIllustration;
     }
 
     /**
@@ -253,6 +251,28 @@ public class RikishiScrapper implements Scrapper {
             }
         }
         return null;
+    }
+
+    /**
+     * Load image bytes from the source website (so beware of exceptions)
+     * @param downloadURL is URL of the image
+     * @return the byte array of the image, can be NULL
+     */
+    protected @Nullable byte[] getImageBytes(URL downloadURL) {
+        try (InputStream in = new BufferedInputStream(downloadURL.openStream())) {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] buf = new byte[1024];
+            int n;
+            while (-1 != (n = in.read(buf))) {
+                out.write(buf, 0, n);
+            }
+            out.close();
+            in.close();
+            return out.toByteArray();
+        } catch (IOException ioe) {
+            LOGGER.warn("Unable to download image from " + downloadURL.toString());
+            return null;
+        }
     }
 
     /**

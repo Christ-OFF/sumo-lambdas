@@ -18,11 +18,6 @@ public interface Scrapper {
     /**
      * Retrieve one element detail
      */
-    DomainObject getDetail(IdAndUrl idAndUrl);
+    DomainObject getDetail(IdAndUrl idAndUrl, byte[] defaultIllustration);
 
-    /**
-     * Retrieve on image may unimplemented as pictures are not always available
-     * ex: yes for rikishis, no or maybe ate best for fights, bashos, ...
-     */
-    byte[] getIllustration(IdAndUrl idAndUrl);
 }

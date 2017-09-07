@@ -7,8 +7,12 @@ import com.christoff.apps.scrappers.RikishiScrapper;
 import com.christoff.apps.sumo.lambda.LambdaBase;
 import com.christoff.apps.sumo.lambda.domain.ExtractInfo;
 import com.christoff.apps.sumo.lambda.domain.Rikishi;
+import com.google.common.io.Resources;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
+import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -25,6 +29,7 @@ public class LambdaMethodHandler extends LambdaBase {
      * There is only on extract info (is it an anti-pattern ?)
      */
     private static final int EXTRACT_INFO_ID = 1;
+    public static final String DEFAULT_JPG = "default.jpg";
 
     /**
      * To store annotated Objects
@@ -58,7 +63,7 @@ public class LambdaMethodHandler extends LambdaBase {
             this.mapper = new DynamoDBMapper( getDynamoDbClient( context ));
             // Rikishis
             if (extractInfoOnly != null && !extractInfoOnly.isEmpty() && !Boolean.valueOf(extractInfoOnly)) {
-                boolean result = handleRikishis(baseurl, listurl);
+                boolean result = handleRikishis(baseurl, listurl, imageurl);
                 if (result) {
                     LOGGER.info("SUCCESS");
                 } else {
@@ -80,15 +85,23 @@ public class LambdaMethodHandler extends LambdaBase {
      * @param listurl url of rikishis list
      * @return true if there is no failure at all
      */
-    private boolean handleRikishis(String baseurl, String listurl){
+    private boolean handleRikishis(String baseurl, String listurl, String imageurl){
         // Rikishis
         LOGGER.info("Entering Sumo Scrapping process...for " + listurl);
+        // Get the default picture for pictureless rikishis
+        byte[] defaultPicture = getDefaultRikishiPicture();
+        if (defaultPicture == null){
+            LOGGER.error("Cannot process rikishis without a default picture");
+            return false;
+        }
+        // Prepare the scrapper
         RikishiScrapper rikishiScrapper = new RikishiScrapper();
         rikishiScrapper.setBaseUrl(baseurl);
         rikishiScrapper.setListUrl(listurl);
+        rikishiScrapper.setImageUrl(imageurl);
         List<IdAndUrl> rikishisUrls = rikishiScrapper.select();
         LOGGER.info("Going to query " + rikishisUrls.size() + " rikishis");
-        List<Rikishi> rikishis = extractRikishis(rikishiScrapper, rikishisUrls);
+        List<Rikishi> rikishis = extractRikishis(rikishiScrapper, rikishisUrls, defaultPicture);
         // Then write them in BATCH (to avoid cost)
         List<DynamoDBMapper.FailedBatch> failures = mapper.batchSave(rikishis);
         LOGGER.info("Save failures " + failures.size());
@@ -97,6 +110,22 @@ public class LambdaMethodHandler extends LambdaBase {
         }
         // fine !
         return !failures.isEmpty();
+    }
+
+    /**
+     * Returns the default picture from the resources
+     * Yes the the default picture is embedded here
+     * @return the byte array of the picture, otherwise NULL
+     * @throws IOException
+     */
+    private @Nullable byte[] getDefaultRikishiPicture() {
+        URL urlDefaultPicture = Resources.getResource(DEFAULT_JPG);
+        try {
+            return Resources.toByteArray(urlDefaultPicture);
+        } catch (IOException e) {
+            LOGGER.error("Unable to load default picture " + DEFAULT_JPG, e);
+            return null;
+        }
     }
 
     /**
@@ -119,15 +148,15 @@ public class LambdaMethodHandler extends LambdaBase {
      * @throws InterruptedException
      * @throws java.util.concurrent.ExecutionException
      */
-    private List<Rikishi> extractRikishis(RikishiScrapper rikishiScrapper, List<IdAndUrl> rikishisUrls) {
+    private List<Rikishi> extractRikishis(RikishiScrapper rikishiScrapper, List<IdAndUrl> rikishisUrls, byte[] defaultPicture) {
         List<Rikishi> result = new ArrayList<>();
         rikishisUrls
             .parallelStream()
             .forEach(rikishiUrl -> {
-                Rikishi detail = (Rikishi) rikishiScrapper.getDetail(rikishiUrl);
+                Rikishi detail = (Rikishi) rikishiScrapper.getDetail(rikishiUrl, defaultPicture);
                 if (detail != null) {
                     result.add(detail);
-                }
+                } // else rikishi is skipped
             });
         return result;
     }

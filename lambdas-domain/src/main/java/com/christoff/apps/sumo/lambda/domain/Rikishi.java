@@ -5,6 +5,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 
 /**
  * Created by christophe on 20.06.17.
@@ -38,6 +39,9 @@ public class Rikishi implements Serializable, DomainObject {
 
     @DynamoDBAttribute
     private String heya;
+
+    @DynamoDBAttribute
+    private ByteBuffer picture;
 
     public int getId() {
         return id;
@@ -111,6 +115,14 @@ public class Rikishi implements Serializable, DomainObject {
         this.heya = heya;
     }
 
+    public ByteBuffer getPicture() {
+        return picture;
+    }
+
+    public void setPicture(ByteBuffer picture) {
+        this.picture = picture;
+    }
+
     @Override
     public String toString() {
         return "Rikishi{" +
@@ -123,6 +135,7 @@ public class Rikishi implements Serializable, DomainObject {
             ", height=" + height +
             ", weight=" + weight +
             ", heya='" + heya + '\'' +
+            ", picture='" + String.valueOf(picture != null)  + '\'' +
             '}';
     }
 }
