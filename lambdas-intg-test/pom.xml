@@ -29,7 +29,7 @@
         <dependency>
             <groupId>com.christoff.apps.sumo</groupId>
             <artifactId>lambdas-domain</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
+            <version>0.0.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -57,11 +57,16 @@
         </dependency>
         <dependency>
             <groupId>com.christoff.apps.sumo</groupId>
-            <artifactId>lambda-scrap</artifactId>
+            <artifactId>lambda-rikishis-scrap</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.christoff.apps.sumo</groupId>
+            <artifactId>lambda-rikishis-pictures-scrap</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
         <!-- To provide content to scrap -->
         <dependency>
             <groupId>com.github.tomakehurst</groupId>

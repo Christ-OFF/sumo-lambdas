@@ -15,7 +15,8 @@
         <module>lambdas-common</module>
         <module>lambdas-domain</module>
         <module>scraplib</module>
-        <module>lambda-scrap</module>
+        <module>lambda-rikishis-scrap</module>
+        <module>lambda-rikishis-pictures-scrap</module>
         <module>lambda-extractinfo</module>
         <module>lambda-rikishis</module>
         <module>lambdas-intg-test</module>

@@ -5,16 +5,12 @@ import com.christoff.apps.sumo.lambda.domain.Rikishi;
 import com.christoff.apps.utils.FilterRank;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
@@ -28,8 +24,9 @@ import java.util.regex.Pattern;
 /**
  * Created by christophe on 30.04.17.
  */
-public class RikishiScrapper implements Scrapper {
+public class RikishisScrapper implements Scrapper {
 
+    public static final String FAKE_HOST = "http://0.0.0.0/";
     private static final int RIKISHI_COLUMN = 0;
     private static final String TABLE_LIST_BODY_SELECTOR = "body > div > div > table > tbody > tr > td.layoutright > table > tbody";
     private static final int DATA_NAME_COLUMN = 0;
@@ -45,18 +42,12 @@ public class RikishiScrapper implements Scrapper {
     private static final String TABLE_LINE_SELECTOR = "tr";
     private static final String TABLE_CELL_SELECTOR = "td";
     private static final int RANK_COLUMN = 1;
-    private static final String IMAGE_EXTENSION = ".jpg";
-    public static final String FAKE_HOST = "http://0.0.0.0/";
-
+    private static final Logger LOGGER = Logger.getLogger(RikishisScrapper.class);
     /**
      * birthdate start with birthdate but contains age we neeed the date only
      */
     private final Pattern datePattern = Pattern.compile("([a-zA-Z]* \\d{1,2}, \\d{4}) (.*)");
     private final Pattern heightWeightPattern = Pattern.compile("(\\d+) cm (\\d+(\\.\\d{1,2})?) kg");
-
-    private static final Logger LOGGER = Logger.getLogger(RikishiScrapper.class);
-
-
     private RikishisScrapParameters scrapParameters;
 
     /**
@@ -64,7 +55,7 @@ public class RikishiScrapper implements Scrapper {
      *
      * @param scrapParameters is where will search for stuff to scrap
      */
-    public RikishiScrapper(RikishisScrapParameters scrapParameters) {
+    public RikishisScrapper(RikishisScrapParameters scrapParameters) {
         this.scrapParameters = scrapParameters;
     }
 
@@ -98,6 +89,7 @@ public class RikishiScrapper implements Scrapper {
 
     /**
      * Helper method to extract id
+     *
      * @param url the riskishi url with params
      * @return the id of the rikishi
      */
@@ -173,27 +165,6 @@ public class RikishiScrapper implements Scrapper {
     }
 
     /**
-     * Retrieve on image may unimplemented as pictures are not always available
-     * ex: yes for rikishis, no or maybe ate best for fights, bashos, ...
-     * @param id the id of the image
-     * @param  defaultIllustration if impossaible to download we must return a default content
-     */
-    @Override
-    public byte[] getIllustration(Integer id, byte[] defaultIllustration) {
-        String downloadUrl = scrapParameters.getFullImageUrl() + id + IMAGE_EXTENSION;
-        try {
-            byte[] result = getImageBytes(new URL(downloadUrl));
-            if (result != null) {
-                LOGGER.debug("Successfully downloaded picture from " + downloadUrl);
-                return result;
-            }
-        } catch (MalformedURLException e) {
-            LOGGER.warn("Malformed Url " + downloadUrl, e);
-        }
-        return defaultIllustration;
-    }
-
-    /**
      * Some string are string1 - string2 - string3
      * and we want the last one
      */
@@ -234,30 +205,9 @@ public class RikishiScrapper implements Scrapper {
     }
 
     /**
-     * Load image bytes from the source website (so beware of exceptions)
-     * @param downloadURL is URL of the image
-     * @return the byte array of the image, can be NULL
-     */
-    protected @Nullable byte[] getImageBytes(URL downloadURL) {
-        try (InputStream in = new BufferedInputStream(downloadURL.openStream())) {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            byte[] buf = new byte[1024];
-            int n;
-            while (-1 != (n = in.read(buf))) {
-                out.write(buf, 0, n);
-            }
-            out.close();
-            in.close();
-            return out.toByteArray();
-        } catch (IOException ioe) {
-            LOGGER.warn("Unable to download image from " + downloadURL.toString());
-            return null;
-        }
-    }
-
-    /**
      * Dedicated method to manage height and weight
      * TODO should refactor this. I hate method altering their params
+     *
      * @param result
      * @param valueCell the HTML cell
      */

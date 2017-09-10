@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
+        <relativePath>../</relativePath>
         <groupId>com.christoff.apps.sumo</groupId>
         <artifactId>sumolambdas</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>lambda-rikishi-picture</artifactId>
+    <artifactId>lambda-rikishis-scrap</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
-    <name>Rikishi Picture Lambda</name>
-    <description>This AWS Lambda will return picture by id</description>
+    <description>This AWS Lambda will populate a DynamoDB with sumo data scrapped from source website</description>
 
     <dependencies>
 
@@ -27,6 +27,11 @@
         <dependency>
             <groupId>com.christoff.apps.sumo</groupId>
             <artifactId>lambdas-common</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.christoff.apps.sumo</groupId>
+            <artifactId>scraplib</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
@@ -50,6 +55,15 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-log4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intellij</groupId>
+            <artifactId>annotations</artifactId>
+            <optional>true</optional>
         </dependency>
 
     </dependencies>

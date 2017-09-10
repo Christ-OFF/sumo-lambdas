@@ -21,14 +21,14 @@ import static org.junit.Assert.*;
 /**
  * Created by christophe on 30.04.17.
  */
-public class RikishiScrapperTest {
+public class RikishisScrapperTest {
 
     /**
      * for the test I have ONE picture, could have more...
      */
     private static final String RIKISHI_PICTURE = "42.jpg";
 
-    private RikishiScrapper tested;
+    private RikishisScrapper tested;
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule();
@@ -36,7 +36,7 @@ public class RikishiScrapperTest {
     @Before
     public void setup(){
         RikishisScrapParameters params = new RikishisScrapParameters.Builder("http://localhost:8080/").build();
-        tested = new RikishiScrapper(params);
+        tested = new RikishisScrapper(params);
     }
 
     @Test
@@ -176,36 +176,6 @@ public class RikishiScrapperTest {
         assertEquals(expected.getHeight(),result.getHeight());
         assertEquals(expected.getWeight(),result.getWeight(),0);
         assertEquals(expected.getRank(),result.getRank());
-    }
-
-    @Test
-    public void should_scrap_picture() throws IOException {
-        // Given
-        int expectedId = 42;
-        URL urlPicture = Resources.getResource("42.jpg");
-        byte[] bodyPicture = Resources.toByteArray(urlPicture);
-        stubFor(get(urlEqualTo("/" + RikishisScrapParameters.DEFAULT_PICS_PATH + "42.jpg"))
-            .willReturn(aResponse()
-                .withStatus(200)
-                .withBody(bodyPicture)));
-        // When
-        byte[] result = tested.getIllustration(expectedId, new byte[0]);
-        // Then
-        assertNotNull(result);
-        assertArrayEquals(bodyPicture, result);
-    }
-
-    @Test
-    public void should_fallback_to_default_on_missing_image() throws IOException, ParseException {
-        // Given
-        stubFor(get(urlEqualTo("/" + RikishisScrapParameters.DEFAULT_PICS_PATH + "666.jpg")).willReturn(aResponse().withStatus(404)));
-        URL urlPicture = Resources.getResource("42.jpg");
-        byte[] bodyPicture = Resources.toByteArray(urlPicture);
-        // When
-        byte[] result = tested.getIllustration(666, bodyPicture);
-        // Then
-        assertNotNull(result);
-        assertArrayEquals(bodyPicture, result);
     }
 
 }

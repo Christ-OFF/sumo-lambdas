@@ -138,7 +138,7 @@ public class RikishiWriteReadTest {
     @Test
     public void should_store_and_retrieve_extract_info() throws IOException {
         // Given
-        LambdaMethodHandler lmh = new LambdaMethodHandler();
+        ScrapRikishisLambdaMethodHandler lmh = new ScrapRikishisLambdaMethodHandler();
         RikishisScrapParameters parameters = new RikishisScrapParameters.Builder("http://localhost:8089/").extractInfoOnly(EXTRACT_INFO_ONLY).build();
         lmh.handleRequest(LambdaBase.buildLocalContext(), parameters);
         // When
@@ -178,7 +178,7 @@ public class RikishiWriteReadTest {
                 .withStatus(200)
                 .withBody(bodyPicture)));
         // When storing
-        LambdaMethodHandler lmh = new LambdaMethodHandler();
+        ScrapRikishisLambdaMethodHandler lmh = new ScrapRikishisLambdaMethodHandler();
         RikishisScrapParameters parameters = new RikishisScrapParameters.Builder("http://localhost:8089/").build();
         lmh.handleRequest(LambdaBase.buildLocalContext(), parameters);
         // and retrieving
