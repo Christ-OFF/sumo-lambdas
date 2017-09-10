@@ -4,6 +4,7 @@ import com.christoff.apps.sumo.lambda.domain.DomainObject;
 import com.christoff.apps.sumo.lambda.domain.Rikishi;
 import com.christoff.apps.utils.FilterRank;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -16,11 +17,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -47,6 +46,7 @@ public class RikishiScrapper implements Scrapper {
     private static final String TABLE_CELL_SELECTOR = "td";
     private static final int RANK_COLUMN = 1;
     private static final String IMAGE_EXTENSION = ".jpg";
+    public static final String FAKE_HOST = "http://0.0.0.0/";
 
     /**
      * birthdate start with birthdate but contains age we neeed the date only
@@ -56,30 +56,24 @@ public class RikishiScrapper implements Scrapper {
 
     private static final Logger LOGGER = Logger.getLogger(RikishiScrapper.class);
 
-    public void setBaseUrl(String baseUrl) {
-        this.baseUrl = baseUrl;
+
+    private RikishisScrapParameters scrapParameters;
+
+    /**
+     * We cannot start the process without thos basic properties
+     *
+     * @param scrapParameters is where will search for stuff to scrap
+     */
+    public RikishiScrapper(RikishisScrapParameters scrapParameters) {
+        this.scrapParameters = scrapParameters;
     }
-
-    public void setListUrl(String listUrl) {
-        this.listUrl = listUrl;
-    }
-
-    private String baseUrl;
-
-    private String listUrl;
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
-    private String imageUrl;
 
     @Override
-    public List<IdAndUrl> select() {
-        LOGGER.info("Going to select " + baseUrl + listUrl);
-        List<IdAndUrl> result = new ArrayList<>();
+    public List<Integer> select() {
+        LOGGER.info("Going to select " + scrapParameters.getFullListUrl());
+        List<Integer> result = new ArrayList<>();
         try {
-            Document mainPage = Jsoup.connect(baseUrl + listUrl).get();
+            Document mainPage = Jsoup.connect(scrapParameters.getFullListUrl()).get();
             Elements tableBody = mainPage.select(TABLE_LIST_BODY_SELECTOR);
             if (tableBody == null) {
                 LOGGER.warn("Unable to find Rikishi table returning empty result");
@@ -93,17 +87,11 @@ public class RikishiScrapper implements Scrapper {
                 if (rikishiLinks.size() != 1) {
                     LOGGER.warn("Ignoring " + rikishiCell.toString());
                 } else {
-                    String url = baseUrl + rikishiLinks.attr("href");
-                    try {
-                        int id = extractIdFromURL(url);
-                        result.add(new IdAndUrl(id, url));
-                    } catch (MalformedURLException mue) {
-                        LOGGER.warn("Skipping. Unable to extract id information from bad url " + url, mue);
-                    }
+                    result.add(extractIdFromURL(rikishiLinks.attr("href")));
                 }
             }
         } catch (IOException e) {
-            LOGGER.warn("Error connecting to " + baseUrl + ". Returning empty list", e);
+            LOGGER.warn("Error connecting to " + scrapParameters.getFullListUrl() + ". Returning empty list", e);
         }
         return result;
     }
@@ -113,17 +101,19 @@ public class RikishiScrapper implements Scrapper {
      * @param url the riskishi url with params
      * @return the id of the rikishi
      */
-    private int extractIdFromURL(String url) throws MalformedURLException {
-        URL aURL = new URL(url);
+    private int extractIdFromURL(@NotNull String url) throws MalformedURLException {
+        URL aURL = new URL(FAKE_HOST + url); // URL Need a protocol + a host
         String query = aURL.getQuery();
         String[] queryArray = query.split("=");
         return Integer.parseInt(queryArray[1]);
     }
 
     @Override
-    public DomainObject getDetail(IdAndUrl idAndUrl, byte[] defaulIllustration) {
+    public DomainObject getDetail(Integer id) {
+        String rikishiUrl = scrapParameters.getFullRikishiUrl() + id;
         try {
-            Document mainPage = Jsoup.connect(idAndUrl.getUrl()).get();
+            LOGGER.info("Going to get Rikishi detail " + rikishiUrl);
+            Document mainPage = Jsoup.connect(rikishiUrl).get();
             Elements rikishiData = mainPage.select(TABLE_RIKISHIDATA);
             if (rikishiData == null || rikishiData.size() != 1) {
                 LOGGER.warn("No rikishi data found. Returning null");
@@ -131,7 +121,7 @@ public class RikishiScrapper implements Scrapper {
             }
             Elements tableLines = rikishiData.get(0).getElementsByTag(TABLE_LINE_SELECTOR);
             Rikishi result = new Rikishi();
-            result.setId(idAndUrl.getId());
+            result.setId(id);
             for (Element line : tableLines) {
                 Elements cells = line.getElementsByTag(TABLE_CELL_SELECTOR);
                 if (cells.size() == 2) {
@@ -171,24 +161,13 @@ public class RikishiScrapper implements Scrapper {
             }
             // Rikishi is done . but we may exclude him
             if (FilterRank.includeRank(result.getRank())) {
-                // We are going to return it. So go for the picture
-                byte[] illustration = getIllustration(idAndUrl, defaulIllustration);
-                // Note from Amazon about binary fields :
-                // Source : http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-data-types
-                // Applications that work with Binary attributes must encode the data in Base64 format
-                // before sending it to DynamoDB.
-                // Upon receipt of the data, DynamoDB decodes it into an unsigned byte array
-                // and uses that as the length of the attribute.
-                byte[] illustrationBase64 = Base64.getEncoder().encode(illustration);
-                ByteBuffer buffer = ByteBuffer.wrap(illustrationBase64);
-                result.setPicture(buffer);
                 return result;
             } else {
                 LOGGER.warn("Excluding " + result.getId() + " because of rank");
                 return null;
             }
         } catch (IOException e) {
-            LOGGER.error("Error connecting to " + idAndUrl.toString(), e);
+            LOGGER.error("Error connecting to " + rikishiUrl, e);
             return null;
         }
     }
@@ -196,19 +175,20 @@ public class RikishiScrapper implements Scrapper {
     /**
      * Retrieve on image may unimplemented as pictures are not always available
      * ex: yes for rikishis, no or maybe ate best for fights, bashos, ...
-     * @param idAndUrl the way we can get the image
+     * @param id the id of the image
      * @param  defaultIllustration if impossaible to download we must return a default content
      */
-    protected byte[] getIllustration(IdAndUrl idAndUrl, byte[] defaultIllustration) {
-        String downloadUrl = baseUrl + imageUrl + idAndUrl.getId() + IMAGE_EXTENSION;
+    @Override
+    public byte[] getIllustration(Integer id, byte[] defaultIllustration) {
+        String downloadUrl = scrapParameters.getFullImageUrl() + id + IMAGE_EXTENSION;
         try {
             byte[] result = getImageBytes(new URL(downloadUrl));
             if (result != null) {
-                LOGGER.debug("Sucessfully downloaded picture from " + downloadUrl);
+                LOGGER.debug("Successfully downloaded picture from " + downloadUrl);
                 return result;
             }
         } catch (MalformedURLException e) {
-            LOGGER.warn("Malformed Url for rikishi id " + idAndUrl.getId(), e);
+            LOGGER.warn("Malformed Url " + downloadUrl, e);
         }
         return defaultIllustration;
     }

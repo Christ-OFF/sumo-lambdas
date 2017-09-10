@@ -13,7 +13,6 @@ import java.net.URL;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -25,18 +24,9 @@ import static org.junit.Assert.*;
 public class RikishiScrapperTest {
 
     /**
-     * The mocked path under which the mock picture will be returned
-     */
-    public static final String PIC_URL = "pic/";
-    /**
      * for the test I have ONE picture, could have more...
      */
-    public static final String RIKISHI_PICTURE = "42.jpg";
-    /**
-     * The mocked but like real url under which a riskishi html is returned
-     */
-    public static final String RIKISHI_URL = "Rikishi.aspx?r=";
-    public static final String LIST_URL = "list";
+    private static final String RIKISHI_PICTURE = "42.jpg";
 
     private RikishiScrapper tested;
 
@@ -45,26 +35,24 @@ public class RikishiScrapperTest {
 
     @Before
     public void setup(){
-        tested = new RikishiScrapper();
-        tested.setBaseUrl("http://localhost:8080/");
-        tested.setImageUrl(PIC_URL);
+        RikishisScrapParameters params = new RikishisScrapParameters.Builder("http://localhost:8080/").build();
+        tested = new RikishiScrapper(params);
     }
 
     @Test
     public void should_parse_captured_page() throws IOException {
         // Given
-        tested.setListUrl(LIST_URL);
         URL url = Resources.getResource("rikishilist.html");
         String body = Resources.toString(url, Charsets.UTF_8);
-        stubFor(get(urlEqualTo("/" + LIST_URL))
+        stubFor(get(urlEqualTo("/" + RikishisScrapParameters.DEFAULT_LIST_QUERY))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withBody(body)));
         // When
-        List<IdAndUrl> result = tested.select();
+        List<Integer> result = tested.select();
         // Then
         assertEquals("Should have two results",3,result.size());
-        assertEquals(new IdAndUrl(8948,"http://localhost:8080/Rikishi.aspx?r=8948"),result.get(0));
+        assertEquals("Should retrieve the first rikishi", 8948, result.get(0).intValue());
     }
 
     @Test
@@ -127,7 +115,7 @@ public class RikishiScrapperTest {
                         .withStatus(200)
                         .withBody(body)));
         // DO
-        Rikishi result  = (Rikishi) tested.getDetail(new IdAndUrl(42,"http://localhost:8080/Rikishi.aspx?r=42"), new byte[0]);
+        Rikishi result = (Rikishi) tested.getDetail(42);
 
         assertNull(result);
     }
@@ -167,19 +155,12 @@ public class RikishiScrapperTest {
         // Given
         URL url = Resources.getResource(rikishiDefinitition);
         String body = Resources.toString(url, Charsets.UTF_8);
-        stubFor(get(urlEqualTo("/" + RIKISHI_URL + expected.getId()))
+        stubFor(get(urlEqualTo("/" + RikishisScrapParameters.DEFAULT_RIKISHI_QUERY + expected.getId()))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withBody(body)));
-        URL urlPicture = Resources.getResource(rikishiPicture);
-        byte[] bodyPicture = Resources.toByteArray(urlPicture);
-        byte[] bodyPictureBase64 = Base64.getEncoder().encode(bodyPicture);
-        stubFor(get(urlEqualTo( "/" + PIC_URL + expected.getId() + ".jpg"))
-            .willReturn(aResponse()
-                .withStatus(200)
-                .withBody(bodyPicture)));
         // When
-        Rikishi result  = (Rikishi) tested.getDetail(new IdAndUrl(expected.getId(),"http://localhost:8080/Rikishi.aspx?r=" + expected.getId()),new byte[0]);
+        Rikishi result = (Rikishi) tested.getDetail(expected.getId());
         // Then
         assertNotNull(result);
         assertEquals(expected.getId(),result.getId());
@@ -195,30 +176,36 @@ public class RikishiScrapperTest {
         assertEquals(expected.getHeight(),result.getHeight());
         assertEquals(expected.getWeight(),result.getWeight(),0);
         assertEquals(expected.getRank(),result.getRank());
-        assertNotNull(result.getPicture());
-        assertArrayEquals(bodyPictureBase64,result.getPicture().array());
+    }
+
+    @Test
+    public void should_scrap_picture() throws IOException {
+        // Given
+        int expectedId = 42;
+        URL urlPicture = Resources.getResource("42.jpg");
+        byte[] bodyPicture = Resources.toByteArray(urlPicture);
+        stubFor(get(urlEqualTo("/" + RikishisScrapParameters.DEFAULT_PICS_PATH + "42.jpg"))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withBody(bodyPicture)));
+        // When
+        byte[] result = tested.getIllustration(expectedId, new byte[0]);
+        // Then
+        assertNotNull(result);
+        assertArrayEquals(bodyPicture, result);
     }
 
     @Test
     public void should_fallback_to_default_on_missing_image() throws IOException, ParseException {
         // Given
-        URL url = Resources.getResource("hakuho.html");
-        String body = Resources.toString(url, Charsets.UTF_8);
-        stubFor(get(urlEqualTo("/" + RIKISHI_URL + "666"))
-            .willReturn(aResponse()
-                .withStatus(200)
-                .withBody(body)));
-        stubFor(get(urlEqualTo( "/" + PIC_URL + "666.jpg")).willReturn(aResponse().withStatus(404)));
-        URL urlDefaultPicture = Resources.getResource("42.jpg");
-        byte[] defaultPicture = Resources.toByteArray(urlDefaultPicture);
-        byte[] defaultPictureBase64 = Base64.getEncoder().encode(defaultPicture);
+        stubFor(get(urlEqualTo("/" + RikishisScrapParameters.DEFAULT_PICS_PATH + "666.jpg")).willReturn(aResponse().withStatus(404)));
+        URL urlPicture = Resources.getResource("42.jpg");
+        byte[] bodyPicture = Resources.toByteArray(urlPicture);
         // When
-        Rikishi result  = (Rikishi) tested.getDetail(new IdAndUrl(666,"http://localhost:8080/Rikishi.aspx?r=" + 666),defaultPicture);
+        byte[] result = tested.getIllustration(666, bodyPicture);
         // Then
         assertNotNull(result);
-        assertNotNull(result.getPicture());
-        assertArrayEquals(defaultPictureBase64,result.getPicture().array());
+        assertArrayEquals(bodyPicture, result);
     }
-
 
 }

@@ -11,13 +11,21 @@ public interface Scrapper {
 
     /**
      * There is alway a root page to start with
-     * @return the list of urls to call in the next step
+     * @return the list of selected ids
      */
-    List<IdAndUrl> select() ;
+    List<Integer> select();
 
     /**
      * Retrieve one element detail
      */
-    DomainObject getDetail(IdAndUrl idAndUrl, byte[] defaultIllustration);
+    DomainObject getDetail(Integer id);
 
+    /**
+     * Retrieve on image may unimplemented as pictures are not always available
+     * ex: yes for rikishis, no or maybe ate best for fights, bashos, ...
+     *
+     * @param id                  only the scrapper must know were ALL images are
+     * @param defaultIllustration if impossaible to download we must return a default content
+     */
+    byte[] getIllustration(Integer id, byte[] defaultIllustration);
 }

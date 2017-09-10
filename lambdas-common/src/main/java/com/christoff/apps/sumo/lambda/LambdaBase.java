@@ -21,14 +21,15 @@ public abstract class LambdaBase {
      * When the function is this one then we are executing locallys
      */
     private static final String LOCAL_FUNCTION_NAME = "LOCAL_FUNCTION_NAME";
+    private static final String SERVICE_ENDPOINT = "http://0.0.0.0:8000";
 
     /**
      * Build a fake context that will be detected as "local"
      * This way conneczion to dynamoDB will be done
      * eiher locally or via AWS
-     * @return
+     * @return a minimal context with one expected property
      */
-    public static final Context buildLocalContext() {
+    public static Context buildLocalContext() {
         return new Context() {
             @Override
             public String getAwsRequestId() {
@@ -89,8 +90,8 @@ public abstract class LambdaBase {
 
     /**
      * This is the way we know for sure that we are local
-     * @param context
-     * @return
+     * @param context the AWS or handmade context
+     * @return true is the expected function name is local
      */
     private boolean isLocal(Context context){
         return context != null && LOCAL_FUNCTION_NAME.equals(context.getFunctionName());
@@ -108,7 +109,7 @@ public abstract class LambdaBase {
         } else {
             LOGGER.info("Building DynamoDB client for LOCAL");
             client = AmazonDynamoDBClientBuilder.standard().withEndpointConfiguration(
-                new AwsClientBuilder.EndpointConfiguration("http://localhost:8000", "us-west-2"))
+                new AwsClientBuilder.EndpointConfiguration(SERVICE_ENDPOINT, "us-west-2"))
                 .build();
         }
         return client;

@@ -18,6 +18,7 @@
         <module>lambda-scrap</module>
         <module>lambda-extractinfo</module>
         <module>lambda-rikishis</module>
+        <module>lambdas-intg-test</module>
     </modules>
 
     <dependencyManagement>
