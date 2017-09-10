@@ -68,7 +68,7 @@ public class ScrapRikishisLambdaMethodHandler extends LambdaBase {
         } else {
             // Init
             LOGGER.info("Entering Sumo Scrapping process...for " + params.toString());
-            this.mapper = new DynamoDBMapper(getDynamoDbClient(context));
+            mapper = new DynamoDBMapper(getDynamoDbClient(context));
             // Rikishis
             if (!params.getExtractInfoOnly()) {
                 boolean result = handleRikishis(params);

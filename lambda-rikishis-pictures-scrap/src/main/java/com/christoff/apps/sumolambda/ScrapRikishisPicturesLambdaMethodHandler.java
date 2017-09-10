@@ -1,12 +1,11 @@
 package com.christoff.apps.sumolambda;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.lambda.runtime.Context;
+import com.christoff.apps.scrappers.RikishiPicturesScrapper;
 import com.christoff.apps.scrappers.RikishisPicturesScrapParameters;
-import com.christoff.apps.scrappers.RikishisScrapParameters;
-import com.christoff.apps.scrappers.RikishisScrapper;
 import com.christoff.apps.sumo.lambda.LambdaBase;
-import com.christoff.apps.sumo.lambda.domain.ExtractInfo;
 import com.christoff.apps.sumo.lambda.domain.Rikishi;
 import com.christoff.apps.sumo.lambda.domain.RikishiPicture;
 import com.google.common.io.Resources;
@@ -16,9 +15,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.ByteBuffer;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
@@ -29,10 +25,6 @@ public class ScrapRikishisPicturesLambdaMethodHandler extends LambdaBase {
 
     private static final Logger LOGGER = Logger.getLogger(ScrapRikishisPicturesLambdaMethodHandler.class);
 
-    /**
-     * There is only on extract info (is it an anti-pattern ?)
-     */
-    private static final int EXTRACT_INFO_ID = 1;
     private static final String DEFAULT_JPG = "default.jpg";
 
     /**
@@ -72,55 +64,17 @@ public class ScrapRikishisPicturesLambdaMethodHandler extends LambdaBase {
         if (!params.isValid()) {
             LOGGER.error("Mandatory env variables are missing. " + params.toString());
         } else {
-            // Init
-            LOGGER.info("Entering Sumo Scrapping process...for " + params.toString());
-            this.mapper = new DynamoDBMapper( getDynamoDbClient( context ));
-            // Rikishis
-            if (!params.getExtractInfoOnly()) {
-                boolean result = handleRikishis(params);
-                if (result) {
-                    LOGGER.info("SUCCESS");
-                } else {
-                    LOGGER.warn("There was a failure on handling rikishis");
-                }
+            mapper = new DynamoDBMapper(getDynamoDbClient(context));
+            //
+            DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
+            List<Rikishi> result = mapper.scan(Rikishi.class, scanExpression);
+            LOGGER.info("Got " + result.size() + " rikishis pictures to process");
+            if (scrapPictures(result, params)) {
+                LOGGER.info("Scrapped pictures");
             } else {
-                LOGGER.info("Skipped Rikishis");
+                LOGGER.warn("Unable to scrap pictures");
             }
-            // Last step extract info about scrapping
-            handleExtractInfo();
-            // It's over
-            LOGGER.info("Finished Sumo Scrapping process");
         }
-    }
-
-    /**
-     * Get from web scrapper and Write Rikishis to DynamoDB
-     * @param parameters the mandatory addresses we must know to scrap
-     * @return true if there is no failure at all
-     */
-    private boolean handleRikishis(RikishisScrapParameters parameters) {
-        // Rikishis
-        LOGGER.info("Entering Sumo Scrapping process...for " + parameters.toString());
-        // Get the default picture for pictureless rikishis
-        byte[] defaultPicture = getDefaultRikishiPicture();
-        if (defaultPicture == null){
-            LOGGER.error("Cannot process rikishis without a default picture");
-            return false;
-        }
-        // Prepare the scrapper
-        RikishisScrapper rikishisScrapper = new RikishisScrapper(parameters);
-        List<Integer> rikishisIds = rikishisScrapper.select();
-        LOGGER.info("Going to query " + rikishisIds.size() + " rikishis");
-        List<Rikishi> rikishis = extractRikishis(rikishisScrapper, rikishisIds);
-        // Then write them in BATCH (to avoid cost)
-        List<DynamoDBMapper.FailedBatch> failures = mapper.batchSave(rikishis);
-        LOGGER.info("Save failures " + failures.size());
-        if (!failures.isEmpty()){
-            LOGGER.error("Error saving riskishis", failures.get(0).getException());
-            return false;
-        }
-        LOGGER.info("Going to extract and save pictures ");
-        return scrapPictures(rikishis, rikishisScrapper, defaultPicture);
     }
 
     /**
@@ -129,17 +83,30 @@ public class ScrapRikishisPicturesLambdaMethodHandler extends LambdaBase {
      *
      * @return always true as single save does not return a failure like batchSave do
      */
-    private boolean scrapPictures(List<Rikishi> rikishis, RikishisScrapper scrapper, byte[] defaultPicture) {
+    private boolean scrapPictures(List<Rikishi> rikishis, RikishisPicturesScrapParameters params) {
+        // Prepare
+        RikishiPicturesScrapper picturesScrapper = new RikishiPicturesScrapper(params);
+        byte[] defaulPicture = getDefaultRikishiPicture();
+        if (defaulPicture == null) {
+            LOGGER.error("No loadin possible without a default picture");
+            return false;
+        }
+        byte[] base64DefaultPicture = Base64.getEncoder().encode(defaulPicture);
+        // Stream
         rikishis
             .parallelStream()
             .map(Rikishi::getId)
             .forEach(id -> {
-                byte[] picture = scrapper.getIllustration(id, defaultPicture);
-                byte[] base64picture = Base64.getEncoder().encode(picture);
-                RikishiPicture rikishiPicture = new RikishiPicture();
-                rikishiPicture.setId(id);
-                rikishiPicture.setPicture(ByteBuffer.wrap(base64picture));
-                mapper.save(rikishiPicture);
+                RikishiPicture result = picturesScrapper.getDetail(id);
+                if (result != null) {
+                    result.setPicture(Base64.getEncoder().encode(result.getPicture()));
+                } else {
+                    LOGGER.warn("Saving default picture for rikishi " + id);
+                    result = new RikishiPicture();
+                    result.setId(id);
+                    result.setPicture(ByteBuffer.wrap(base64DefaultPicture));
+                }
+                mapper.save(result);
             });
         return true;
     }
@@ -157,34 +124,5 @@ public class ScrapRikishisPicturesLambdaMethodHandler extends LambdaBase {
             LOGGER.error("Unable to load default picture " + DEFAULT_JPG, e);
             return null;
         }
-    }
-
-    /**
-     *  Save and extract info with today as Date
-     */
-    private void handleExtractInfo(){
-        ExtractInfo extractInfo = new ExtractInfo();
-        extractInfo.setId(EXTRACT_INFO_ID);
-        LocalDate now = LocalDate.now();
-        extractInfo.setDate(now.format(DateTimeFormatter.ISO_DATE));
-        mapper.save(extractInfo);
-    }
-
-    /**
-     * Extract Rikishis using multiple threadss
-     * @param rikishisIds We need a list of ids as the deatil url is known
-     * @return the filter list of rikishis
-     */
-    private List<Rikishi> extractRikishis(RikishisScrapper rikishisScrapper, List<Integer> rikishisIds) {
-        List<Rikishi> result = new ArrayList<>();
-        rikishisIds
-            .parallelStream()
-            .forEach(rikishiUrl -> {
-                Rikishi detail = (Rikishi) rikishisScrapper.getDetail(rikishiUrl);
-                if (detail != null) {
-                    result.add(detail);
-                } // else rikishi is skipped
-            });
-        return result;
     }
 }

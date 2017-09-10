@@ -4,6 +4,7 @@ import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.model.*;
+import com.christoff.apps.scrappers.RikishisPicturesScrapParameters;
 import com.christoff.apps.scrappers.RikishisScrapParameters;
 import com.christoff.apps.sumo.lambda.LambdaBase;
 import com.christoff.apps.sumo.lambda.domain.ExtractInfo;
@@ -46,6 +47,7 @@ public class RikishiWriteReadTest {
     private static final String ID = "id";
     private static final String EXTRACT_INFO_ONLY = "true";
     private static final int HAKUHO_NB = 1123;
+    private static final String WIREMOCK_HOST = "http://localhost:8089/";
 
     /**
      * Needed for fake web content
@@ -55,8 +57,7 @@ public class RikishiWriteReadTest {
 
     /**
      * We need our won client to do some setup
-     *
-     * @return
+     * @return the dynamoDB client to local docker
      */
     private static AmazonDynamoDB getClient() {
         return AmazonDynamoDBClientBuilder
@@ -97,8 +98,7 @@ public class RikishiWriteReadTest {
 
     /**
      * All tables created are the same for now
-     *
-     * @return
+     * @return what we define here as standard table creation parameters
      */
     private static CreateTableRequest getCreateTableRequest(String tablename) {
         CreateTableRequest createTableRequest = new CreateTableRequest();
@@ -139,7 +139,7 @@ public class RikishiWriteReadTest {
     public void should_store_and_retrieve_extract_info() throws IOException {
         // Given
         ScrapRikishisLambdaMethodHandler lmh = new ScrapRikishisLambdaMethodHandler();
-        RikishisScrapParameters parameters = new RikishisScrapParameters.Builder("http://localhost:8089/").extractInfoOnly(EXTRACT_INFO_ONLY).build();
+        RikishisScrapParameters parameters = new RikishisScrapParameters.Builder(WIREMOCK_HOST).extractInfoOnly(EXTRACT_INFO_ONLY).build();
         lmh.handleRequest(LambdaBase.buildLocalContext(), parameters);
         // When
         ExtractInfoHandler localHandler = new ExtractInfoHandler();
@@ -173,14 +173,18 @@ public class RikishiWriteReadTest {
         URL urlPicture = Resources.getResource("rikishi_picture.jpg");
         byte[] bodyPicture = Resources.toByteArray(urlPicture);
         byte[] bodyPictureBase64 = Base64.getEncoder().encode(bodyPicture);
-        wireMockServer.stubFor(get(urlEqualTo("/" + RikishisScrapParameters.DEFAULT_PICS_PATH + HAKUHO_NB + ".jpg"))
+        wireMockServer.stubFor(get(urlEqualTo("/" + RikishisPicturesScrapParameters.DEFAULT_PICS_PATH + HAKUHO_NB + ".jpg"))
             .willReturn(aResponse()
                 .withStatus(200)
                 .withBody(bodyPicture)));
-        // When storing
+        // When scraping details
         ScrapRikishisLambdaMethodHandler lmh = new ScrapRikishisLambdaMethodHandler();
-        RikishisScrapParameters parameters = new RikishisScrapParameters.Builder("http://localhost:8089/").build();
+        RikishisScrapParameters parameters = new RikishisScrapParameters.Builder(WIREMOCK_HOST).build();
         lmh.handleRequest(LambdaBase.buildLocalContext(), parameters);
+        // and pictures
+        ScrapRikishisPicturesLambdaMethodHandler lambdaMethodHandler = new ScrapRikishisPicturesLambdaMethodHandler();
+        RikishisPicturesScrapParameters picturesScrapParameters = new RikishisPicturesScrapParameters.Builder(WIREMOCK_HOST).build();
+        lambdaMethodHandler.handleRequest(LambdaBase.buildLocalContext(), picturesScrapParameters);
         // and retrieving
         RikishisHandler rikishisHandler = new RikishisHandler();
         List<Rikishi> result = rikishisHandler.handleRequest(null, LambdaBase.buildLocalContext());
