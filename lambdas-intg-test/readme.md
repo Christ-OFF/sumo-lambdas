@@ -9,6 +9,7 @@ docker run -v "$PWD":/dynamodb_local_db -p 8000:8000 cnadiminti/dynamodb-local:l
 # Create required tables in dynamoDB Manually
 `aws dynamodb create-table --endpoint-url http://0.0.0.0:8000 --table-name RIKISHIS --attribute-definitions AttributeName=id,AttributeType=N --key-schema AttributeName=id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5`  
 `aws dynamodb create-table --endpoint-url http://0.0.0.0:8000 --table-name EXTRACT_INFO --attribute-definitions AttributeName=id,AttributeType=N --key-schema AttributeName=id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5`  
+`aws dynamodb create-table --endpoint-url http://0.0.0.0:8000 --table-name RIKISHIS_PICTURES --attribute-definitions AttributeName=id,AttributeType=N --key-schema AttributeName=id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5`  
 
 # check if tables exists
 `aws dynamodb list-tables --endpoint-url http://0.0.0.0:8000`  
@@ -16,7 +17,8 @@ should output :
 `{
     "TableNames": [
         "EXTRACT_INFO", 
-        "RIKISHIS"
+        "RIKISHIS",
+        "RIKISHIS_PICTURES"
     ]
 }
 `

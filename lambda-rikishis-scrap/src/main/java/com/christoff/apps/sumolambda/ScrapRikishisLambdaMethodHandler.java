@@ -2,9 +2,14 @@ package com.christoff.apps.sumolambda;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.sns.AmazonSNS;
+import com.amazonaws.services.sns.AmazonSNSClientBuilder;
+import com.amazonaws.services.sns.model.PublishRequest;
+import com.amazonaws.services.sns.model.PublishResult;
 import com.christoff.apps.scrappers.RikishisScrapParameters;
 import com.christoff.apps.scrappers.RikishisScrapper;
 import com.christoff.apps.sumo.lambda.LambdaBase;
+import com.christoff.apps.sumo.lambda.domain.Constants;
 import com.christoff.apps.sumo.lambda.domain.ExtractInfo;
 import com.christoff.apps.sumo.lambda.domain.Rikishi;
 import org.apache.log4j.Logger;
@@ -17,7 +22,7 @@ import java.util.List;
 /**
  * This is the entry point of lambda processing
  */
-public class ScrapRikishisLambdaMethodHandler extends LambdaBase {
+public class ScrapRikishisLambdaMethodHandler extends LambdaBase implements Constants {
 
     private static final Logger LOGGER = Logger.getLogger(ScrapRikishisLambdaMethodHandler.class);
 
@@ -108,10 +113,29 @@ public class ScrapRikishisLambdaMethodHandler extends LambdaBase {
             LOGGER.error("Error saving riskishis", failures.get(0).getException());
             return false;
         }
-        LOGGER.info("Successfully extracted Rikishis details (not pictures)");
+        LOGGER.info("Successfully extracted Rikishis details (going to notify for pictures)");
+        AmazonSNS snsClient = AmazonSNSClientBuilder.standard().build();
+        rikishis.stream()
+            .map(Rikishi::getId)
+            .forEach(id -> publishDetailUpdated(snsClient, id));
         return true;
     }
 
+    /**
+     * Publish that a Rikishi have been created or updated
+     *
+     * @param id
+     * @return true if publish was ok
+     */
+    private void publishDetailUpdated(AmazonSNS sns, int id) {
+        PublishRequest publishRequest = new PublishRequest(RIKISHI_UPDATED, String.valueOf(id));
+        PublishResult publishResult = sns.publish(publishRequest);
+        if (publishResult != null && publishResult.getMessageId() != null) {
+            LOGGER.info("MessageId - " + publishResult.getMessageId() + " sent for rikishi id " + id);
+        } else {
+            LOGGER.warn("Message for Rikishi " + id + " was NOT sent");
+        }
+    }
     /**
      * Save and extract info with today as Date
      */
@@ -133,8 +157,8 @@ public class ScrapRikishisLambdaMethodHandler extends LambdaBase {
         List<Rikishi> result = new ArrayList<>();
         rikishisIds
             .parallelStream()
-            .forEach(rikishiUrl -> {
-                Rikishi detail = (Rikishi) rikishisScrapper.getDetail(rikishiUrl);
+            .forEach(id -> {
+                Rikishi detail = (Rikishi) rikishisScrapper.getDetail(id);
                 if (detail != null) {
                     result.add(detail);
                 } // else rikishi is skipped
