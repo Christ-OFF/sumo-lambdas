@@ -11,9 +11,7 @@ Provides lambda to be used by sumoport ionic app
     http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.Endpoint.html  
     or -better- use Docker !
     
-2. To Run : `java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb
-`    
-   
+2. To Run : `java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb`    
 2. Follow this documentation to run locally
     http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/CodeSamples.Java.html#CodeSamples.Java.RegionAndEndpoint  
     Main code is :   
