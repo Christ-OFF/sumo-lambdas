@@ -1,6 +1,10 @@
 # Purpose
 Provides lambda to be used by sumoport ionic app
 
+# Diagrams
+
+![Sequence Diagram](https://raw.githubusercontent.com/Christ-OFF/sumolambdas/develop/doc/SeqGlobal.png)
+
 # Run locally
 
 1. Install and run DynamoDB locally
