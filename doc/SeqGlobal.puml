@@ -1,0 +1,56 @@
+@startuml
+actor user
+participant SumoApp
+participant λExtractInfo #DarkSalmon
+participant λRikishis #DarkSalmon
+participant λRikishiPicture #DarkSalmon
+control AWSScheduler #orange
+database AWSDynamoDB #orange
+participant λRikishiScrap #DarkSalmon
+participant AWSSNS #orange
+participant λRikishiPictureScrap #DarkSalmon
+participant SumoDB #gray
+AWSScheduler -> λRikishiScrap : Call
+activate λRikishiScrap
+λRikishiScrap -> SumoDB : Scrap List
+loop active rikishis
+λRikishiScrap -> SumoDB : Scrap Rikishi
+λRikishiScrap -> AWSSNS : Pub Rikishi update\n(id)
+end
+λRikishiScrap -> AWSDynamoDB : persist Rikishis
+λRikishiScrap -> AWSDynamoDB : update extract
+deactivate λRikishiScrap
+AWSSNS -> λRikishiPictureScrap : Sub (id)
+activate λRikishiPictureScrap
+λRikishiPictureScrap -> SumoDB : get Picture
+λRikishiPictureScrap -> AWSDynamoDB : persist
+deactivate λRikishiPictureScrap
+...
+user -> SumoApp : open
+activate SumoApp
+    SumoApp -> λExtractInfo : via AWS API
+    activate λExtractInfo
+        λExtractInfo -> AWSDynamoDB : get last update
+        λExtractInfo -> SumoApp : last update Json
+    deactivate λExtractInfo
+SumoApp -> user : propose update
+deactivate SumoApp
+user -> SumoApp : update
+activate SumoApp
+    SumoApp -> λRikishis : get rikishis
+    activate λRikishis
+        λRikishis -> AWSDynamoDB : fetch Rikishis
+        λRikishis -> SumoApp : Rikishis JSON
+    deactivate λRikishis
+    SumoApp -> SumoApp : persist (SQLite)
+    loop Rikishis
+        SumoApp -> λRikishiPicture : fetch picture
+        activate λRikishiPicture
+            λRikishiPicture -> AWSDynamoDB : fetch picture
+            λRikishiPicture -> SumoApp : picture
+        deactivate λRikishiPicture
+        SumoApp -> SumoApp : persist (folder)
+    end
+    SumoApp -> user : Ready
+deactivate SumoApp
+@enduml
