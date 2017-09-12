@@ -12,6 +12,8 @@ import com.christoff.apps.sumo.lambda.LambdaBase;
 import com.christoff.apps.sumo.lambda.domain.Constants;
 import com.christoff.apps.sumo.lambda.domain.ExtractInfo;
 import com.christoff.apps.sumo.lambda.domain.Rikishi;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.log4j.Logger;
 
 import java.time.LocalDate;
@@ -56,7 +58,7 @@ public class ScrapRikishisLambdaMethodHandler extends LambdaBase implements Cons
         RikishisScrapParameters params = new RikishisScrapParameters.Builder(System.getenv("baseurl"))
             .withListUrl(System.getenv("listurl"))
             .withRikishiUrl(System.getenv("rikishiurl"))
-            .withExtractInfoOny(System.getenv("withExtractInfoOny"))
+            .withextractInfoOnly(System.getenv("extractInfoOnly"))
             .build();
         handleRequest(context, params);
     }
@@ -74,6 +76,7 @@ public class ScrapRikishisLambdaMethodHandler extends LambdaBase implements Cons
             // Init
             LOGGER.info("Entering Sumo Scrapping process...for " + params.toString());
             mapper = new DynamoDBMapper(getDynamoDbClient(context));
+            HttpClient client = HttpClientBuilder.create().build();
             // Rikishis
             if (!params.getExtractInfoOnly()) {
                 boolean result = handleRikishis(context, params);

@@ -43,6 +43,7 @@ public class RikishisPicturesScrapParameters {
      * Builder providing default values
      */
     public static class Builder {
+
         private RikishisPicturesScrapParameters builded;
 
         /**
@@ -56,7 +57,7 @@ public class RikishisPicturesScrapParameters {
             builded.imageurl = DEFAULT_PICS_PATH;
         }
 
-        public Builder imageUrl(@NotNull String url) {
+        public Builder withImageUrl(String url) {
             builded.imageurl = url;
             return this;
         }

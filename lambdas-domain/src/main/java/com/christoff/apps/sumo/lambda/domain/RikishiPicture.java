@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
 /**
  * Created by christophe on 20.06.17.
  */
-@DynamoDBTable(tableName = "RIKISHIS")
+@DynamoDBTable(tableName = "RIKISHIS_PICTURES")
 public class RikishiPicture implements Serializable, DomainObject {
 
     @DynamoDBHashKey

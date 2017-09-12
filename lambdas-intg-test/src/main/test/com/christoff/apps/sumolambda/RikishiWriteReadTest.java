@@ -4,6 +4,7 @@ import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.model.*;
+import com.amazonaws.services.lambda.runtime.events.SNSEvent;
 import com.christoff.apps.scrappers.RikishisPicturesScrapParameters;
 import com.christoff.apps.scrappers.RikishisScrapParameters;
 import com.christoff.apps.sumo.lambda.LambdaBase;
@@ -139,7 +140,7 @@ public class RikishiWriteReadTest {
     public void should_store_and_retrieve_extract_info() throws IOException {
         // Given
         ScrapRikishisLambdaMethodHandler lmh = new ScrapRikishisLambdaMethodHandler();
-        RikishisScrapParameters parameters = new RikishisScrapParameters.Builder(WIREMOCK_HOST).withExtractInfoOny(EXTRACT_INFO_ONLY).build();
+        RikishisScrapParameters parameters = new RikishisScrapParameters.Builder(WIREMOCK_HOST).withextractInfoOnly(EXTRACT_INFO_ONLY).build();
         lmh.handleRequest(LambdaBase.buildLocalContext(), parameters);
         // When
         ExtractInfoHandler localHandler = new ExtractInfoHandler();
@@ -182,9 +183,16 @@ public class RikishiWriteReadTest {
         RikishisScrapParameters parameters = new RikishisScrapParameters.Builder(WIREMOCK_HOST).build();
         lmh.handleRequest(LambdaBase.buildLocalContext(), parameters);
         // and pictures
-        ScrapRikishisPicturesLambdaMethodHandler lambdaMethodHandler = new ScrapRikishisPicturesLambdaMethodHandler();
+        ScrapRikishiPictureLambdaMethodHandler lambdaMethodHandler = new ScrapRikishiPictureLambdaMethodHandler();
         RikishisPicturesScrapParameters picturesScrapParameters = new RikishisPicturesScrapParameters.Builder(WIREMOCK_HOST).build();
-        lambdaMethodHandler.handleRequest(LambdaBase.buildLocalContext(), picturesScrapParameters);
+        // Prepare a fake SNSEvent
+        SNSEvent snsEvent = new SNSEvent();
+        SNSEvent.SNSRecord snsRecord = new SNSEvent.SNSRecord();
+        SNSEvent.SNS sns = new SNSEvent.SNS();
+        sns.setMessage(String.valueOf(HAKUHO_NB));
+        snsRecord.setSns(sns);
+        snsEvent.setRecords(Collections.singletonList(snsRecord));
+        lambdaMethodHandler.handleRequest(snsEvent, LambdaBase.buildLocalContext(), picturesScrapParameters);
         // and retrieving
         RikishisHandler rikishisHandler = new RikishisHandler();
         List<Rikishi> result = rikishisHandler.handleRequest(null, LambdaBase.buildLocalContext());

@@ -58,7 +58,7 @@
         </dependency>
         <dependency>
             <groupId>com.christoff.apps.sumo</groupId>
-            <artifactId>lambda-rikishis-pictures-scrap</artifactId>
+            <artifactId>lambda-rikishi-picture-scrap</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>

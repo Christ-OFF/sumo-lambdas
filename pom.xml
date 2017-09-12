@@ -16,7 +16,7 @@
         <module>lambdas-domain</module>
         <module>scraplib</module>
         <module>lambda-rikishis-scrap</module>
-        <module>lambda-rikishis-pictures-scrap</module>
+        <module>lambda-rikishi-picture-scrap</module>
         <module>lambda-extractinfo</module>
         <module>lambda-rikishis</module>
         <module>lambdas-intg-test</module>
@@ -54,6 +54,11 @@
                 <artifactId>aws-java-sdk-sns</artifactId>
                 <version>${aws.sdk.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-lambda-java-log4j</artifactId>
+                <version>1.0.0</version>
+            </dependency>
             <!-- End of AWS Lambda dependencies -->
 
             <!-- Other dependencies -->
@@ -64,9 +69,9 @@
                 <version>1.2.17</version>
             </dependency>
             <dependency>
-                <groupId>com.amazonaws</groupId>
-                <artifactId>aws-lambda-java-log4j</artifactId>
-                <version>1.0.0</version>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>4.5.2</version><!-- 4.5.2 is the version included in AWS -->
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
@@ -88,7 +93,6 @@
                 <artifactId>junit-vintage-engine</artifactId>
                 <version>${junit.version}</version>
             </dependency>
-
         </dependencies>
 
     </dependencyManagement>

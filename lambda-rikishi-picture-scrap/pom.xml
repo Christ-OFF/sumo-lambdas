@@ -11,10 +11,10 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>lambda-rikishis-pictures-scrap</artifactId>
+    <artifactId>lambda-rikishi-picture-scrap</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
-    <description>This AWS Lambda will populate a DynamoDB with sumo data scrapped from source website</description>
+    <description>This AWS Lambda will scrap one picture (id is retrived from SNSEvent</description>
 
     <dependencies>
 
@@ -43,6 +43,10 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-dynamodb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-events</artifactId>
         </dependency>
         <!-- End of AWS Lambda dependencies -->
 

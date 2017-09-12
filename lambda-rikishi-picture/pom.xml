@@ -39,6 +39,10 @@
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-dynamodb</artifactId>
         </dependency>
+        <dependency>
+            <groupId></groupId>
+            <artifactId>event</artifactId>
+        </dependency>
         <!-- End of AWS Lambda dependencies -->
 
         <!-- Other dependencies -->

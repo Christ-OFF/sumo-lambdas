@@ -53,7 +53,7 @@ public class RikishisScrapParameters {
             "baseurl='" + baseurl + '\'' +
             ", listurl='" + listurl + '\'' +
             ", rikishiurl='" + rikishiurl + '\'' +
-            ", withExtractInfoOny='" + extractInfoOnly + '\'' +
+            ", extractInfoOnly='" + extractInfoOnly + '\'' +
             '}';
     }
 
@@ -78,17 +78,17 @@ public class RikishisScrapParameters {
             builded.extractInfoOnly = DEFAULT_EXTRACTONLY;
         }
 
-        public Builder withListUrl(@NotNull String url) {
+        public Builder withListUrl(String url) {
             builded.listurl = url;
             return this;
         }
 
-        public Builder withRikishiUrl(@NotNull String url) {
+        public Builder withRikishiUrl(String url) {
             builded.rikishiurl = url;
             return this;
         }
 
-        public Builder withExtractInfoOny(@NotNull String extractInfoOnly) {
+        public Builder withextractInfoOnly(String extractInfoOnly) {
             builded.extractInfoOnly = extractInfoOnly;
             return this;
         }
