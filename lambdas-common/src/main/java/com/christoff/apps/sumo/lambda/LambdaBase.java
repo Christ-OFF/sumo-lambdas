@@ -93,7 +93,7 @@ public abstract class LambdaBase {
      * @param context the AWS or handmade context
      * @return true is the expected function name is local
      */
-    private boolean isLocal(Context context){
+    protected boolean isLocal(Context context) {
         return context != null && LOCAL_FUNCTION_NAME.equals(context.getFunctionName());
     }
 

@@ -14,9 +14,10 @@ public class RikishisPicturesScrapParameters {
     private String baseurl;
     private String imageurl;
 
-    private RikishisPicturesScrapParameters(Builder builder) {
-        this.baseurl = builder.baseurl;
-        this.imageurl = builder.imageurl;
+    /**
+     * Only builder can build
+     */
+    private RikishisPicturesScrapParameters() {
     }
 
     public String getFullImageUrl() {
@@ -42,8 +43,7 @@ public class RikishisPicturesScrapParameters {
      * Builder providing default values
      */
     public static class Builder {
-        private final String baseurl;
-        private String imageurl = DEFAULT_PICS_PATH;
+        private RikishisPicturesScrapParameters builded;
 
         /**
          * We only ask for base url
@@ -51,16 +51,18 @@ public class RikishisPicturesScrapParameters {
          * @param baseUrl some url like http://sumodb.sumogames.de/
          */
         public Builder(@NotNull String baseUrl) {
-            this.baseurl = baseUrl;
+            builded = new RikishisPicturesScrapParameters();
+            builded.baseurl = baseUrl;
+            builded.imageurl = DEFAULT_PICS_PATH;
         }
 
         public Builder imageUrl(@NotNull String url) {
-            this.imageurl = url;
+            builded.imageurl = url;
             return this;
         }
 
         public RikishisPicturesScrapParameters build() {
-            return new RikishisPicturesScrapParameters(this);
+            return builded;
         }
     }
 }

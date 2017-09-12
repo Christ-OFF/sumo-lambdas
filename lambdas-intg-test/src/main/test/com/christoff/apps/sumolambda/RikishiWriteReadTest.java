@@ -139,7 +139,7 @@ public class RikishiWriteReadTest {
     public void should_store_and_retrieve_extract_info() throws IOException {
         // Given
         ScrapRikishisLambdaMethodHandler lmh = new ScrapRikishisLambdaMethodHandler();
-        RikishisScrapParameters parameters = new RikishisScrapParameters.Builder(WIREMOCK_HOST).extractInfoOnly(EXTRACT_INFO_ONLY).build();
+        RikishisScrapParameters parameters = new RikishisScrapParameters.Builder(WIREMOCK_HOST).withExtractInfoOny(EXTRACT_INFO_ONLY).build();
         lmh.handleRequest(LambdaBase.buildLocalContext(), parameters);
         // When
         ExtractInfoHandler localHandler = new ExtractInfoHandler();

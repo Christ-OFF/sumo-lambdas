@@ -54,9 +54,9 @@ public class ScrapRikishisLambdaMethodHandler extends LambdaBase implements Cons
     public void handleRequest(Context context) {
         // Get Env parameters : Those parameters are set in AWS Lambda console
         RikishisScrapParameters params = new RikishisScrapParameters.Builder(System.getenv("baseurl"))
-            .listUrl(System.getenv("listurl"))
-            .rikishiUrl(System.getenv("rikishiurl"))
-            .extractInfoOnly(System.getenv("extractInfoOnly"))
+            .withListUrl(System.getenv("listurl"))
+            .withRikishiUrl(System.getenv("rikishiurl"))
+            .withExtractInfoOny(System.getenv("withExtractInfoOny"))
             .build();
         handleRequest(context, params);
     }
@@ -76,7 +76,7 @@ public class ScrapRikishisLambdaMethodHandler extends LambdaBase implements Cons
             mapper = new DynamoDBMapper(getDynamoDbClient(context));
             // Rikishis
             if (!params.getExtractInfoOnly()) {
-                boolean result = handleRikishis(params);
+                boolean result = handleRikishis(context, params);
                 if (result) {
                     LOGGER.info("SUCCESS");
                 } else {
@@ -98,7 +98,7 @@ public class ScrapRikishisLambdaMethodHandler extends LambdaBase implements Cons
      * @param parameters the mandatory addresses we must know to scrap
      * @return true if there is no failure at all
      */
-    private boolean handleRikishis(RikishisScrapParameters parameters) {
+    private boolean handleRikishis(Context context, RikishisScrapParameters parameters) {
         // Rikishis
         LOGGER.info("Entering Sumo Scrapping process...for " + parameters.toString());
         // Prepare the scrapper
@@ -117,23 +117,26 @@ public class ScrapRikishisLambdaMethodHandler extends LambdaBase implements Cons
         AmazonSNS snsClient = AmazonSNSClientBuilder.standard().build();
         rikishis.stream()
             .map(Rikishi::getId)
-            .forEach(id -> publishDetailUpdated(snsClient, id));
+            .forEach(id -> publishDetailUpdated(context, snsClient, id));
         return true;
     }
 
     /**
      * Publish that a Rikishi have been created or updated
      *
-     * @param id
-     * @return true if publish was ok
+     * @param id rikishi unique id
      */
-    private void publishDetailUpdated(AmazonSNS sns, int id) {
-        PublishRequest publishRequest = new PublishRequest(RIKISHI_UPDATED, String.valueOf(id));
-        PublishResult publishResult = sns.publish(publishRequest);
-        if (publishResult != null && publishResult.getMessageId() != null) {
-            LOGGER.info("MessageId - " + publishResult.getMessageId() + " sent for rikishi id " + id);
+    private void publishDetailUpdated(Context context, AmazonSNS sns, int id) {
+        if (isLocal(context)) {
+            LOGGER.warn("Not sending notification when running local for id " + id);
         } else {
-            LOGGER.warn("Message for Rikishi " + id + " was NOT sent");
+            PublishRequest publishRequest = new PublishRequest(RIKISHI_UPDATED, String.valueOf(id));
+            PublishResult publishResult = sns.publish(publishRequest);
+            if (publishResult != null && publishResult.getMessageId() != null) {
+                LOGGER.info("MessageId - " + publishResult.getMessageId() + " sent for rikishi id " + id);
+            } else {
+                LOGGER.warn("Message for Rikishi " + id + " was NOT sent");
+            }
         }
     }
     /**

@@ -18,11 +18,10 @@ public class RikishisScrapParameters {
     private String rikishiurl;
     private String extractInfoOnly;
 
-    private RikishisScrapParameters(Builder builder) {
-        this.baseurl = builder.baseurl;
-        this.listurl = builder.listurl;
-        this.rikishiurl = builder.rikishiurl;
-        this.extractInfoOnly = builder.extractInfoOnly;
+    /**
+     * Only builder can build
+     */
+    private RikishisScrapParameters() {
     }
 
     public String getFullListUrl() {
@@ -54,7 +53,7 @@ public class RikishisScrapParameters {
             "baseurl='" + baseurl + '\'' +
             ", listurl='" + listurl + '\'' +
             ", rikishiurl='" + rikishiurl + '\'' +
-            ", extractInfoOnly='" + extractInfoOnly + '\'' +
+            ", withExtractInfoOny='" + extractInfoOnly + '\'' +
             '}';
     }
 
@@ -62,37 +61,40 @@ public class RikishisScrapParameters {
      * Builder providing default values
      */
     public static class Builder {
-        private final String baseurl;
-        private String listurl = DEFAULT_LIST_QUERY;
-        private String rikishiurl = DEFAULT_RIKISHI_QUERY;
-        private String extractInfoOnly = DEFAULT_EXTRACTONLY;
 
+        private RikishisScrapParameters builded;
         /**
          * We only ask for base url
          *
          * @param baseUrl some url like http://sumodb.sumogames.de/
          */
         public Builder(@NotNull String baseUrl) {
-            this.baseurl = baseUrl;
+            builded = new RikishisScrapParameters();
+            // only mandatory
+            builded.baseurl = baseUrl;
+            // the default value
+            builded.listurl = DEFAULT_LIST_QUERY;
+            builded.rikishiurl = DEFAULT_RIKISHI_QUERY;
+            builded.extractInfoOnly = DEFAULT_EXTRACTONLY;
         }
 
-        public Builder listUrl(@NotNull String url) {
-            this.listurl = url;
+        public Builder withListUrl(@NotNull String url) {
+            builded.listurl = url;
             return this;
         }
 
-        public Builder rikishiUrl(@NotNull String url) {
-            this.rikishiurl = url;
+        public Builder withRikishiUrl(@NotNull String url) {
+            builded.rikishiurl = url;
             return this;
         }
 
-        public Builder extractInfoOnly(@NotNull String extractInfoOnly) {
-            this.extractInfoOnly = extractInfoOnly;
+        public Builder withExtractInfoOny(@NotNull String extractInfoOnly) {
+            builded.extractInfoOnly = extractInfoOnly;
             return this;
         }
 
         public RikishisScrapParameters build() {
-            return new RikishisScrapParameters(this);
+            return builded;
         }
     }
 }
