@@ -2,7 +2,6 @@ package com.christoff.apps.scrappers;
 
 import com.christoff.apps.sumo.lambda.domain.RikishiPicture;
 import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedInputStream;
@@ -39,19 +38,6 @@ public class RikishiPicturesScrapper implements Scrapper {
     public List<Integer> select() {
         throw new UnsupportedOperationException("Pictures are not selected from scrapping");
     }
-
-    /**
-     * Helper method to extract id
-     * @param url the riskishi url with params
-     * @return the id of the rikishi
-     */
-    private int extractIdFromURL(@NotNull String url) throws MalformedURLException {
-        URL aURL = new URL(FAKE_HOST + url); // URL Need a protocol + a host
-        String query = aURL.getQuery();
-        String[] queryArray = query.split("=");
-        return Integer.parseInt(queryArray[1]);
-    }
-
 
     /**
      * Retrieve on image may unimplemented as pictures are not always available

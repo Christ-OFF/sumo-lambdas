@@ -1,13 +1,15 @@
 package com.christoff.apps.sumo.lambda;
 
-import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.amazonaws.services.lambda.runtime.ClientContext;
-import com.amazonaws.services.lambda.runtime.CognitoIdentity;
-import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.lambda.runtime.events.SNSEvent;
+import com.amazonaws.services.sns.AmazonSNS;
+import com.amazonaws.services.sns.AmazonSNSClientBuilder;
+import com.christoff.apps.scrappers.RikishisScrapParameters;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.context.annotation.Bean;
 
 
 /**
@@ -17,101 +19,50 @@ public abstract class LambdaBase {
 
     private static final Logger LOGGER = Logger.getLogger(LambdaBase.class);
 
-    /**
-     * When the function is this one then we are executing locallys
-     */
-    private static final String LOCAL_FUNCTION_NAME = "LOCAL_FUNCTION_NAME";
-    private static final String SERVICE_ENDPOINT = "http://0.0.0.0:8000";
+    @Bean
+    public DynamoDBMapper dynamoDBMapper() {
+        AmazonDynamoDB dynamoDB = AmazonDynamoDBClientBuilder.standard().build();
+        return new DynamoDBMapper(dynamoDB);
+    }
 
-    /**
-     * Build a fake context that will be detected as "local"
-     * This way conneczion to dynamoDB will be done
-     * eiher locally or via AWS
-     * @return a minimal context with one expected property
-     */
-    public static Context buildLocalContext() {
-        return new Context() {
-            @Override
-            public String getAwsRequestId() {
-                return null;
-            }
 
-            @Override
-            public String getLogGroupName() {
-                return null;
-            }
-
-            @Override
-            public String getLogStreamName() {
-                return null;
-            }
-
-            @Override
-            public String getFunctionName() {
-                return LOCAL_FUNCTION_NAME;
-            }
-
-            @Override
-            public String getFunctionVersion() {
-                return null;
-            }
-
-            @Override
-            public String getInvokedFunctionArn() {
-                return null;
-            }
-
-            @Override
-            public CognitoIdentity getIdentity() {
-                return null;
-            }
-
-            @Override
-            public ClientContext getClientContext() {
-                return null;
-            }
-
-            @Override
-            public int getRemainingTimeInMillis() {
-                return 0;
-            }
-
-            @Override
-            public int getMemoryLimitInMB() {
-                return 0;
-            }
-
-            @Override
-            public LambdaLogger getLogger() {
-                return null;
-            }
-        };
+    @Bean
+    public AmazonSNS sns() {
+        return AmazonSNSClientBuilder.standard().build();
     }
 
     /**
-     * This is the way we know for sure that we are local
-     * @param context the AWS or handmade context
-     * @return true is the expected function name is local
+     * The Lambda function will get it's properties from the env
+     * Those properties are set via the admin console
      */
-    protected boolean isLocal(Context context) {
-        return context != null && LOCAL_FUNCTION_NAME.equals(context.getFunctionName());
+    @Bean
+    public RikishisScrapParameters params() {
+        return new RikishisScrapParameters.Builder(System.getenv("publishtopic"))
+            .withBaseUrl(System.getenv("baseurl"))
+            .withListUrl(System.getenv("listurl"))
+            .withRikishiUrl(System.getenv("rikishiurl"))
+            .withextractInfoOnly(System.getenv("extractInfoOnly"))
+            .build();
     }
 
     /**
-     * The moste important method :
-     * We need to connect to dynamo DB
+     * Common method with heavy null checks to extract id from message
+     * @param event message containing raw id
+     * @return id or NULL
      */
-    protected AmazonDynamoDB getDynamoDbClient(Context context) {
-        AmazonDynamoDB client;
-        if (!isLocal(context)) {
-            LOGGER.info("Building DynamoDB client for AWS Cloud");
-            client = AmazonDynamoDBClientBuilder.standard().build();
+    protected @Nullable
+    Integer rikishiIdFromEvent(SNSEvent event) {
+        if (event == null
+            || event.getRecords() == null
+            || event.getRecords().isEmpty()
+            || event.getRecords().get(0) == null
+            || event.getRecords().get(0).getSNS() == null
+            || event.getRecords().get(0).getSNS().getMessage() == null
+            || event.getRecords().get(0).getSNS().getMessage().isEmpty()) {
+            LOGGER.error("Event is null or empty");
+            return null;
         } else {
-            LOGGER.info("Building DynamoDB client for LOCAL");
-            client = AmazonDynamoDBClientBuilder.standard().withEndpointConfiguration(
-                new AwsClientBuilder.EndpointConfiguration(SERVICE_ENDPOINT, "us-west-2"))
-                .build();
+            return Integer.parseInt(event.getRecords().get(0).getSNS().getMessage());
         }
-        return client;
     }
 }

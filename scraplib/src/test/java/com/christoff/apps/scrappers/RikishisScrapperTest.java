@@ -27,6 +27,7 @@ public class RikishisScrapperTest {
      * for the test I have ONE picture, could have more...
      */
     private static final String RIKISHI_PICTURE = "42.jpg";
+    public static final String FAKE_PUBLISH_TOPIC = "FAKE_PUBLISH_TOPIC";
 
     private RikishisScrapper tested;
 
@@ -35,7 +36,7 @@ public class RikishisScrapperTest {
 
     @Before
     public void setup(){
-        RikishisScrapParameters params = new RikishisScrapParameters.Builder("http://localhost:8080/").build();
+        RikishisScrapParameters params = new RikishisScrapParameters.Builder(FAKE_PUBLISH_TOPIC).withBaseUrl("http://localhost:8080/").build();
         tested = new RikishisScrapper(params);
     }
 

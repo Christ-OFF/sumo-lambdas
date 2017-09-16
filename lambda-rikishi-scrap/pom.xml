@@ -11,24 +11,25 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>lambda-rikishi-picture-scrap</artifactId>
+    <artifactId>lambda-rikishi-scrap</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
-    <description>This AWS Lambda will scrap one picture (id is retrieved from SNSEvent</description>
+    <description>This AWS Lambda will populate a DynamoDB with sumo data scrapped from source website</description>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <!-- Import dependency management from Spring Boot -->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
-
-        <!-- Spring Boot -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>spring-boot-starter-logging</artifactId>
-                    <groupId>org.springframework.boot</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
 
         <!-- Domain -->
         <dependency>
@@ -58,11 +59,32 @@
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-sns</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-events</artifactId>
         </dependency>
         <!-- End of AWS Lambda dependencies -->
 
+        <!-- Spring Boot -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                    <groupId>org.springframework.boot</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
         <!-- Other dependencies -->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.10.2</version>
+        </dependency>
         <!-- AWS uses log4j 1.2 See http://docs.aws.amazon.com/lambda/latest/dg/java-logging.html -->
         <dependency>
             <groupId>log4j</groupId>
@@ -93,6 +115,11 @@
             <artifactId>junit-jupiter-api</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
@@ -103,7 +130,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring.boot.version}</version>
                 <configuration>
-                    <mainClass>com.christoff.apps.sumolambda.ScrapRikishiPictureLambdaHandler</mainClass>
+                    <mainClass>com.christoff.apps.sumolambda.ScrapRikishiLambdaHandler</mainClass>
                     <layout>MODULE</layout>
                 </configuration>
                 <executions>
@@ -116,6 +143,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>

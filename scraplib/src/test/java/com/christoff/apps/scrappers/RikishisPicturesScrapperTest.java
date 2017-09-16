@@ -29,7 +29,7 @@ public class RikishisPicturesScrapperTest {
 
     @Before
     public void setup() {
-        RikishisPicturesScrapParameters params = new RikishisPicturesScrapParameters.Builder("http://localhost:8080/").build();
+        RikishisPicturesScrapParameters params = new RikishisPicturesScrapParameters.Builder().withBaseUrl("http://localhost:8080/").build();
         tested = new RikishiPicturesScrapper(params);
     }
 

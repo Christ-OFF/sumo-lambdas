@@ -41,6 +41,27 @@ public class RikishiPicture implements Serializable, DomainObject {
 
     @Override
     public String toString() {
-        return "Rikishi{" + "id=" + id + ", picture='" + (picture != null) + '\'' + '}';
+        return "RikishiPicture{" +
+            "id=" + id +
+            ", picture=" + picture +
+            '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RikishiPicture that = (RikishiPicture) o;
+
+        if (id != that.id) return false;
+        return picture != null ? picture.equals(that.picture) : that.picture == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + (picture != null ? picture.hashCode() : 0);
+        return result;
     }
 }

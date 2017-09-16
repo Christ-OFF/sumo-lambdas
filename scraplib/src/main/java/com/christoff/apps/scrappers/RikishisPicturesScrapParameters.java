@@ -1,6 +1,6 @@
 package com.christoff.apps.scrappers;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * The necessary properties to scrap rikishis pictures
@@ -24,13 +24,6 @@ public class RikishisPicturesScrapParameters {
         return baseurl + imageurl;
     }
 
-    public boolean isValid() {
-        return baseurl != null
-            && !baseurl.isEmpty()
-            && imageurl != null
-            && !imageurl.isEmpty();
-    }
-
     @Override
     public String toString() {
         return "RikishisPicturesScrapParameters{" +
@@ -47,18 +40,25 @@ public class RikishisPicturesScrapParameters {
         private RikishisPicturesScrapParameters builded;
 
         /**
-         * We only ask for base url
-         *
-         * @param baseUrl some url like http://sumodb.sumogames.de/
+         * Only default values
          */
-        public Builder(@NotNull String baseUrl) {
+        public Builder() {
             builded = new RikishisPicturesScrapParameters();
-            builded.baseurl = baseUrl;
+            builded.baseurl = RikishisScrapParameters.DEFAULT_BASE_URL;
             builded.imageurl = DEFAULT_PICS_PATH;
         }
 
-        public Builder withImageUrl(String url) {
-            builded.imageurl = url;
+        public Builder withBaseUrl(@Nullable String url) {
+            if (url != null && !url.isEmpty()) {
+                builded.baseurl = url;
+            }
+            return this;
+        }
+
+        public Builder withImageUrl(@Nullable String url) {
+            if (url != null && !url.isEmpty()) {
+                builded.imageurl = url;
+            }
             return this;
         }
 
