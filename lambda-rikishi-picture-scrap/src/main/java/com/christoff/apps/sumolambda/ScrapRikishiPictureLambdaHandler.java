@@ -3,10 +3,12 @@ package com.christoff.apps.sumolambda;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.SNSEvent;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.christoff.apps.scrappers.RikishiPicturesScrapper;
 import com.christoff.apps.scrappers.RikishisPicturesScrapParameters;
 import com.christoff.apps.scrappers.Scrapper;
-import com.christoff.apps.sumo.lambda.LambdaBase;
+import com.christoff.apps.sumo.lambda.LambdaScrapBase;
 import org.apache.log4j.Logger;
 import org.springframework.boot.Banner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -19,7 +21,7 @@ import org.springframework.context.annotation.Bean;
  * See : https://stackoverflow.com/a/45848699/95040
  */
 @SpringBootApplication
-public class ScrapRikishiPictureLambdaHandler extends LambdaBase implements RequestHandler<SNSEvent, Object> {
+public class ScrapRikishiPictureLambdaHandler extends LambdaScrapBase implements RequestHandler<SNSEvent, Object> {
 
     private static final Logger LOGGER = Logger.getLogger(ScrapRikishiPictureLambdaHandler.class);
 
@@ -41,7 +43,7 @@ public class ScrapRikishiPictureLambdaHandler extends LambdaBase implements Requ
      * Those properties are set via the admin console
      */
     @Bean
-    public RikishisPicturesScrapParameters pictureParams() {
+    public RikishisPicturesScrapParameters params() {
         return new RikishisPicturesScrapParameters.Builder()
             .withBaseUrl(System.getenv("baseurl"))
             .withImageUrl(System.getenv("imageurl"))
@@ -51,6 +53,11 @@ public class ScrapRikishiPictureLambdaHandler extends LambdaBase implements Requ
     @Bean
     Scrapper scrapper(RikishisPicturesScrapParameters params) {
         return new RikishiPicturesScrapper(params);
+    }
+
+    @Bean
+    AmazonS3 s3Client() {
+        return AmazonS3Client.builder().build();
     }
 
     /**
@@ -64,18 +71,10 @@ public class ScrapRikishiPictureLambdaHandler extends LambdaBase implements Requ
         // Beans and services
         RikishiPictureScrapperService service = ctx.getBean(RikishiPictureScrapperService.class);
         //
-        if (event == null
-            || event.getRecords() == null
-            || event.getRecords().isEmpty()
-            || event.getRecords().get(0) == null
-            || event.getRecords().get(0).getSNS() == null
-            || event.getRecords().get(0).getSNS().getMessage() == null
-            || event.getRecords().get(0).getSNS().getMessage().isEmpty()) {
-            LOGGER.error("Event is null or empty. Aborting");
-        } else {
-            String msg = event.getRecords().get(0).getSNS().getMessage();
-            LOGGER.info("Going to scrap detail for " + msg);
-            service.scrap(Integer.parseInt(msg));
+        Integer id = rikishiIdFromEvent(event);
+        if (id != null) {
+            LOGGER.info("Going to scrap picture for " + id);
+            service.scrap(id);
         }
         return null;
     }

@@ -43,6 +43,11 @@
         </dependency>
         <dependency>
             <groupId>com.christoff.apps.sumo</groupId>
+            <artifactId>lambdas-common-scrap</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.christoff.apps.sumo</groupId>
             <artifactId>scraplib</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
@@ -54,7 +59,7 @@
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-dynamodb</artifactId>
+            <artifactId>aws-java-sdk-s3</artifactId>
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>

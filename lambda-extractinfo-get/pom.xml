@@ -1,76 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <relativePath>../</relativePath>
         <groupId>com.christoff.apps.sumo</groupId>
         <artifactId>sumolambdas</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>lambda-rikishi-scrap</artifactId>
+    <artifactId>lambda-extractinfo-get</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
-    <description>This AWS Lambda will populate a DynamoDB with sumo data scrapped from source website</description>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <!-- Import dependency management from Spring Boot -->
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring.boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+    <name>SumoLambda</name>
+    <description>This AWS Lambda will return a full list of Rikishis (no input params yet)</description>
 
     <dependencies>
-
-        <!-- Domain -->
-        <dependency>
-            <groupId>com.christoff.apps.sumo</groupId>
-            <artifactId>lambdas-domain</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.christoff.apps.sumo</groupId>
-            <artifactId>lambdas-common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.christoff.apps.sumo</groupId>
-            <artifactId>lambdas-common-scrap</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.christoff.apps.sumo</groupId>
-            <artifactId>scraplib</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
-        <!-- For AWS Lambda -->
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-lambda-java-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-dynamodb</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-sns</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-lambda-java-events</artifactId>
-        </dependency>
-        <!-- End of AWS Lambda dependencies -->
 
         <!-- Spring Boot -->
         <dependency>
@@ -84,24 +30,34 @@
             </exclusions>
         </dependency>
 
-        <!-- Other dependencies -->
+        <!-- Domain -->
         <dependency>
-            <groupId>org.jsoup</groupId>
-            <artifactId>jsoup</artifactId>
-            <version>1.10.2</version>
+            <groupId>com.christoff.apps.sumo</groupId>
+            <artifactId>lambdas-domain</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
-        <!-- AWS uses log4j 1.2 See http://docs.aws.amazon.com/lambda/latest/dg/java-logging.html -->
         <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
+            <groupId>com.christoff.apps.sumo</groupId>
+            <artifactId>lambdas-common</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <!-- For AWS Lambda -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>
-            <artifactId>aws-lambda-java-log4j</artifactId>
+            <artifactId>aws-java-sdk-dynamodb</artifactId>
         </dependency>
+        <!-- End of AWS Lambda dependencies -->
+
+        <!-- Other dependencies -->
+        <!-- AWS uses log4j 1.2 See http://docs.aws.amazon.com/lambda/latest/dg/java-logging.html -->
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-log4j</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intellij</groupId>
@@ -111,8 +67,9 @@
 
         <!-- Tests -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.10.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -121,8 +78,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -135,7 +92,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring.boot.version}</version>
                 <configuration>
-                    <mainClass>com.christoff.apps.sumolambda.ScrapRikishiLambdaHandler</mainClass>
+                    <mainClass>com.christoff.apps.sumolambda.GetExtractInfoLambdaHandler</mainClass>
                     <layout>MODULE</layout>
                 </configuration>
                 <executions>

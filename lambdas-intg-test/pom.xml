@@ -29,36 +29,25 @@
         </dependency>
         <dependency>
             <groupId>com.christoff.apps.sumo</groupId>
-            <artifactId>lambdas-common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.christoff.apps.sumo</groupId>
-            <artifactId>lambda-extractinfo</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.christoff.apps.sumo</groupId>
-            <artifactId>lambda-rikishis</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.christoff.apps.sumo</groupId>
-            <artifactId>lambda-rikishi-picture</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.christoff.apps.sumo</groupId>
             <artifactId>lambda-rikishis-scrap</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.christoff.apps.sumo</groupId>
+            <artifactId>lambda-extractinfo-get</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.christoff.apps.sumo</groupId>
             <artifactId>lambda-rikishi-picture-scrap</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.christoff.apps.sumo</groupId>
+            <artifactId>lambda-rikishi-picture-get</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
@@ -98,13 +87,19 @@
 
         <!-- TESTS -->
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.junit.vintage</groupId>
-            <artifactId>junit-vintage-engine</artifactId>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.10.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -32,6 +32,11 @@
         </dependency>
         <dependency>
             <groupId>com.christoff.apps.sumo</groupId>
+            <artifactId>lambdas-common-scrap</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.christoff.apps.sumo</groupId>
             <artifactId>scraplib</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
@@ -97,11 +102,6 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
 

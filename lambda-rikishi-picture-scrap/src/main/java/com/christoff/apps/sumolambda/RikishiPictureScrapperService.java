@@ -1,6 +1,7 @@
 package com.christoff.apps.sumolambda;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.christoff.apps.scrappers.RikishisPicturesScrapParameters;
 import com.christoff.apps.scrappers.Scrapper;
 import com.christoff.apps.sumo.lambda.domain.RikishiPicture;
@@ -11,10 +12,10 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.ByteBuffer;
-import java.util.Base64;
 
 /**
  * The service called from the handler to process rikishis
@@ -27,9 +28,10 @@ public class RikishiPictureScrapperService {
     private static final Logger LOGGER = Logger.getLogger(RikishiPictureScrapperService.class);
 
     private static final String DEFAULT_JPG = "default.jpg";
+    public static final String CONTENT_TYPE = "image/jpeg";
 
     private final
-    DynamoDBMapper mapper;
+    AmazonS3 s3;
 
     private final
     RikishisPicturesScrapParameters params;
@@ -38,9 +40,9 @@ public class RikishiPictureScrapperService {
     Scrapper scrapper;
 
     @Autowired
-    public RikishiPictureScrapperService(@NotNull DynamoDBMapper mapper, @NotNull Scrapper scrapper,
+    public RikishiPictureScrapperService(@NotNull AmazonS3 s3, @NotNull Scrapper scrapper,
                                          @NotNull RikishisPicturesScrapParameters params) {
-        this.mapper = mapper;
+        this.s3 = s3;
         this.params = params;
         this.scrapper = scrapper;
     }
@@ -54,19 +56,43 @@ public class RikishiPictureScrapperService {
         if (defaulPicture == null) {
             LOGGER.error("No loading possible without a default picture");
         } else {
-            byte[] base64DefaultPicture = Base64.getEncoder().encode(defaulPicture);
             RikishiPicture result = (RikishiPicture) scrapper.getDetail(rikishiId);
             if (result != null) {
                 LOGGER.info("Saving picture for rikishi " + rikishiId);
-                result.setPicture(Base64.getEncoder().encode(result.getPicture()));
             } else {
                 LOGGER.warn("Saving default picture for rikishi " + rikishiId);
                 result = new RikishiPicture();
                 result.setId(rikishiId);
-                result.setPicture(ByteBuffer.wrap(base64DefaultPicture));
+                result.setPicture(ByteBuffer.wrap(defaulPicture));
             }
-            mapper.save(result);
+            storePictureToS3(rikishiId, result);
         }
+    }
+
+    /**
+     * This method purpose is to store the rikishi picture asIs in S3
+     *
+     * @param rikishiId
+     * @param result
+     */
+    private void storePictureToS3(int rikishiId, RikishiPicture result) {
+        // Storing to S3
+        // First Input Stream
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(result.getPicture().array())) {
+
+            // Second metadata with InputStream
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentType(CONTENT_TYPE);
+            metadata.setContentLength(result.getPicture().array().length);
+            s3.putObject(params.getBucket(),
+                rikishiId + ".jpg",
+                bais,
+                metadata);
+            LOGGER.info("Saved " + rikishiId + ".jpg to " + params.getBucket());
+        } catch (IOException ioe) {
+            LOGGER.error("Unable to read bytes from image. Abort S3Store of " + rikishiId);
+        }
+
     }
 
     /**

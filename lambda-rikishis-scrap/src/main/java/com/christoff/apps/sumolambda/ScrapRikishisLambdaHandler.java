@@ -4,7 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.christoff.apps.scrappers.RikishisScrapParameters;
 import com.christoff.apps.scrappers.RikishisScrapper;
 import com.christoff.apps.scrappers.Scrapper;
-import com.christoff.apps.sumo.lambda.LambdaBase;
+import com.christoff.apps.sumo.lambda.LambdaScrapBase;
 import org.springframework.boot.Banner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -16,17 +16,7 @@ import org.springframework.context.annotation.Bean;
  * See : https://stackoverflow.com/a/45848699/95040
  */
 @SpringBootApplication
-public class ScrapRikishisLambdaHandler extends LambdaBase {
-
-    /**
-     * This main method is NOT required by AWS
-     * It just let you run the application locally
-     * Why ? To populate DynamoDB, to debug, optimize, ...
-     */
-    public static void main(String[] args) {
-        ScrapRikishisLambdaHandler app = new ScrapRikishisLambdaHandler();
-        app.handleRequest(null);
-    }
+public class ScrapRikishisLambdaHandler extends LambdaScrapBase {
 
     /**
      * Build the spring application context by hand
@@ -39,6 +29,20 @@ public class ScrapRikishisLambdaHandler extends LambdaBase {
             .web(false)
             .bannerMode(Banner.Mode.OFF)
             .run(args);
+    }
+
+    /**
+     * The Lambda function will get it's properties from the env
+     * Those properties are set via the admin console
+     */
+    @Bean
+    public RikishisScrapParameters params() {
+        return new RikishisScrapParameters.Builder(System.getenv("publishtopic"))
+            .withBaseUrl(System.getenv("baseurl"))
+            .withListUrl(System.getenv("listurl"))
+            .withRikishiUrl(System.getenv("rikishiurl"))
+            .withextractInfoOnly(System.getenv("extractInfoOnly"))
+            .build();
     }
 
     @Bean

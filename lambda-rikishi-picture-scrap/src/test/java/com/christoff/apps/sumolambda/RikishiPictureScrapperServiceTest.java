@@ -1,6 +1,6 @@
 package com.christoff.apps.sumolambda;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.s3.AmazonS3;
 import com.christoff.apps.scrappers.RikishisPicturesScrapParameters;
 import com.christoff.apps.scrappers.Scrapper;
 import com.christoff.apps.sumo.lambda.domain.RikishiPicture;
@@ -12,14 +12,13 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.nio.ByteBuffer;
-import java.util.Base64;
 
 class RikishiPictureScrapperServiceTest {
 
     private static final int FAKE_NUMBER = 42;
 
     @Mock
-    private DynamoDBMapper dynamoDBMapper;
+    private AmazonS3 s3;
 
     @Mock
     private Scrapper scrapper;
@@ -31,37 +30,25 @@ class RikishiPictureScrapperServiceTest {
     public void initMocks() {
         MockitoAnnotations.initMocks(this);
         params = new RikishisPicturesScrapParameters.Builder().build();
-        tested = new RikishiPictureScrapperService(dynamoDBMapper, scrapper, params);
+        tested = new RikishiPictureScrapperService(s3, scrapper, params);
     }
 
     @Test
-    public void should_save_base64_default_picture_if_no_picture_found() {
+    public void should_save_picture() {
         // Given
         Mockito.when(scrapper.getDetail(FAKE_NUMBER)).thenReturn(null);
         @Nullable byte[] defaultPicture = tested.getDefaultRikishiPicture();
-        @Nullable byte[] base64DefaultPicture = Base64.getEncoder().encode(defaultPicture);
         RikishiPicture expectedPicture = new RikishiPicture();
         expectedPicture.setId(FAKE_NUMBER);
-        expectedPicture.setPicture(ByteBuffer.wrap(base64DefaultPicture));
+        expectedPicture.setPicture(ByteBuffer.wrap(defaultPicture));
         // When
         tested.scrap(FAKE_NUMBER);
         // Then
-        Mockito.verify(dynamoDBMapper).save(Mockito.eq(expectedPicture));
-    }
-
-    @Test
-    public void should_save_new_bas64_picture_if_picture_found() {
-        // Given
-        byte[] reallyFakePicture = new byte[0];
-        byte[] base64ReallyFakePicture = Base64.getEncoder().encode(reallyFakePicture);
-        RikishiPicture expectedPicture = new RikishiPicture();
-        expectedPicture.setId(FAKE_NUMBER);
-        expectedPicture.setPicture(ByteBuffer.wrap(base64ReallyFakePicture));
-        Mockito.when(scrapper.getDetail(FAKE_NUMBER)).thenReturn(expectedPicture);
-        // When
-        tested.scrap(FAKE_NUMBER);
-        // Then
-        Mockito.verify(dynamoDBMapper).save(Mockito.eq(expectedPicture));
+        Mockito.verify(s3).putObject(
+            Mockito.eq(params.getBucket()),
+            Mockito.eq(FAKE_NUMBER + ".jpg"),
+            Mockito.any(),
+            Mockito.any());
     }
 
 }
