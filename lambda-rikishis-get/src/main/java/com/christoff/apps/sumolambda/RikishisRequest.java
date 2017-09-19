@@ -1,4 +1,4 @@
-package com.christoff.apps.sumolambda.rikishisread.pojos;
+package com.christoff.apps.sumolambda;
 
 /**
  * We have no parameter (so sonar is not pleased)

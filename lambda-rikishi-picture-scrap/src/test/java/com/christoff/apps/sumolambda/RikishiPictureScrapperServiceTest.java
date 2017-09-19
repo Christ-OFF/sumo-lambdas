@@ -13,6 +13,8 @@ import org.mockito.MockitoAnnotations;
 
 import java.nio.ByteBuffer;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 class RikishiPictureScrapperServiceTest {
 
     private static final int FAKE_NUMBER = 42;
@@ -38,6 +40,7 @@ class RikishiPictureScrapperServiceTest {
         // Given
         Mockito.when(scrapper.getDetail(FAKE_NUMBER)).thenReturn(null);
         @Nullable byte[] defaultPicture = tested.getDefaultRikishiPicture();
+        assertNotNull(defaultPicture, "Can't test without default picture");
         RikishiPicture expectedPicture = new RikishiPicture();
         expectedPicture.setId(FAKE_NUMBER);
         expectedPicture.setPicture(ByteBuffer.wrap(defaultPicture));

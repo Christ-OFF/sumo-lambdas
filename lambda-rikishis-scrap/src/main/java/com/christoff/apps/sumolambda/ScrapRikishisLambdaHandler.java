@@ -1,6 +1,8 @@
 package com.christoff.apps.sumolambda;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.sns.AmazonSNS;
+import com.amazonaws.services.sns.AmazonSNSClientBuilder;
 import com.christoff.apps.scrappers.RikishisScrapParameters;
 import com.christoff.apps.scrappers.RikishisScrapper;
 import com.christoff.apps.scrappers.Scrapper;
@@ -48,6 +50,11 @@ public class ScrapRikishisLambdaHandler extends LambdaScrapBase {
     @Bean
     Scrapper scrapper(RikishisScrapParameters params) {
         return new RikishisScrapper(params);
+    }
+
+    @Bean
+    public AmazonSNS sns() {
+        return AmazonSNSClientBuilder.standard().build();
     }
 
     /**

@@ -15,7 +15,6 @@ public class ReadWriteBaseIT {
 
     private static final String RIKISHIS_TABLE = "RIKISHIS";
     private static final String EXTRACT_INFO_TABLE = "EXTRACT_INFO";
-    private static final String RIKISHIS_PICTURES_TABLE = "RIKISHIS_PICTURES";
     private static final String ID = "id";
 
     /**
@@ -39,9 +38,6 @@ public class ReadWriteBaseIT {
         // Using CLI aws dynamodb create-table --endpoint-url http://0.0.0.0:8000 --table-name EXTRACT_INFO_TABLE --attribute-definitions AttributeName=id,AttributeType=N --key-schema AttributeName=id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
         CreateTableRequest createTableRequestExtractInfo = buildCreateTableRequest(EXTRACT_INFO_TABLE);
         client.createTable(createTableRequestExtractInfo);
-        // and new one
-        CreateTableRequest createTableRequestRikishisPictures = buildCreateTableRequest(RIKISHIS_PICTURES_TABLE);
-        client.createTable(createTableRequestRikishisPictures);
     }
 
     /**
