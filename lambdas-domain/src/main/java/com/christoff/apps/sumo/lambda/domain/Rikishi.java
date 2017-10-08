@@ -16,7 +16,7 @@ public class Rikishi implements Serializable, DomainObject {
     private int id;
 
     @DynamoDBAttribute
-    private String name;
+    private String sumoName;
 
     @DynamoDBAttribute
     private String rank;
@@ -47,12 +47,12 @@ public class Rikishi implements Serializable, DomainObject {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getSumoName() {
+        return sumoName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setSumoName(String sumoName) {
+        this.sumoName = sumoName;
     }
 
     public String getRank() {
@@ -115,7 +115,7 @@ public class Rikishi implements Serializable, DomainObject {
     public String toString() {
         return "Rikishi{" +
             "id=" + id +
-            ", name='" + name + '\'' +
+            ", sumoName='" + sumoName + '\'' +
             ", rank='" + rank + '\'' +
             ", realName='" + realName + '\'' +
             ", birthDate='" + birthDate + '\'' +

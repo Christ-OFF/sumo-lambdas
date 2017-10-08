@@ -37,7 +37,7 @@ class GetRikishisServiceTest {
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
         Rikishi expected = new Rikishi();
         expected.setId(42);
-        expected.setName("Test");
+        expected.setSumoName("Test");
         List<Rikishi> expectedList = Collections.singletonList(expected);
         Mockito.when(dynamoDBMapper.scan(Mockito.eq(Rikishi.class),
             Mockito.any()))

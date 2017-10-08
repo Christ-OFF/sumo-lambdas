@@ -65,7 +65,7 @@ public class RikishisScrapperTest {
         LocalDate birthDate = LocalDate.of(1985,3,11);
         hakuho.setBirthDate(birthDate.format(DateTimeFormatter.ISO_DATE));
         hakuho.setHeya("Miyagino");
-        hakuho.setName("Hakuho Sho");
+        hakuho.setSumoName("Hakuho Sho");
         hakuho.setShusshin("Mongolia, Ulan-Bator");
         hakuho.setHeight(192);
         hakuho.setWeight(152.9);
@@ -82,7 +82,7 @@ public class RikishisScrapperTest {
         LocalDate birthDate = LocalDate.of(1987,3,9);
         tochiozan.setBirthDate(birthDate.format(DateTimeFormatter.ISO_DATE));
         tochiozan.setHeya("Kasugano");
-        tochiozan.setName("Tochiozan Yuichiro");
+        tochiozan.setSumoName("Tochiozan Yuichiro");
         tochiozan.setShusshin("Kochi-ken, Susaki-shi - Kochi-ken, Aki-shi");
         tochiozan.setHeight(188);
         tochiozan.setWeight(150.6);
@@ -98,7 +98,7 @@ public class RikishisScrapperTest {
         LocalDate birthDate = LocalDate.of(1984,4,14);
         harumafuji.setBirthDate(birthDate.format(DateTimeFormatter.ISO_DATE));
         harumafuji.setHeya("Isegahama");
-        harumafuji.setName("Harumafuji Kohei");
+        harumafuji.setSumoName("Harumafuji Kohei");
         harumafuji.setShusshin("Mongolia, Ulan-Bator - Mongolia, Gobi-Altai");
         harumafuji.setHeight(186);
         harumafuji.setWeight(133);
@@ -129,7 +129,7 @@ public class RikishisScrapperTest {
         LocalDate birthDate = LocalDate.of(1991,11,29);
         terunofuji.setBirthDate(birthDate.format(DateTimeFormatter.ISO_DATE));
         terunofuji.setHeya("Isegahama");
-        terunofuji.setName("Terunofuji Haruo");
+        terunofuji.setSumoName("Terunofuji Haruo");
         terunofuji.setShusshin("Mongolia, Ulan-Bator");
         terunofuji.setHeight(192);
         terunofuji.setWeight(158.5);
@@ -144,7 +144,7 @@ public class RikishisScrapperTest {
         terunofuji.setRealName("GANERDENE Gantulga");
         terunofuji.setBirthDate(null);
         terunofuji.setHeya("Isegahama");
-        terunofuji.setName("Terunofuji Haruo");
+        terunofuji.setSumoName("Terunofuji Haruo");
         terunofuji.setShusshin("Mongolia, Ulan-Bator");
         terunofuji.setHeight(192);
         terunofuji.setWeight(158.5);
@@ -172,7 +172,7 @@ public class RikishisScrapperTest {
             assertEquals(expected.getBirthDate(), result.getBirthDate());
         }
         assertEquals("Heya",expected.getHeya(),result.getHeya());
-        assertEquals("Name",expected.getName(),result.getName());
+        assertEquals("Name", expected.getSumoName(), result.getSumoName());
         assertEquals(expected.getShusshin(),result.getShusshin());
         assertEquals(expected.getHeight(),result.getHeight());
         assertEquals(expected.getWeight(),result.getWeight(),0);

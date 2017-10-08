@@ -130,7 +130,7 @@ public class RikishisScrapper implements Scrapper {
                             result.setHeya(getLastValue(valueCell.text()));
                             break;
                         case SHIKONA:
-                            result.setName(getLastValue(valueCell.text()));
+                            result.setSumoName(getLastValue(valueCell.text()));
                             break;
                         case SHUSSHIN:
                             result.setShusshin(valueCell.text());
