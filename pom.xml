@@ -19,7 +19,6 @@
         <module>lambda-rikishis-scrap</module>
         <module>lambda-rikishi-scrap</module>
         <module>lambda-rikishi-picture-scrap</module>
-        <module>lambda-extractinfo-get</module>
         <module>lambda-rikishis-get</module>
         <module>lambdas-intg-test</module>
     </modules>
