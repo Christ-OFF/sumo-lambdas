@@ -6,7 +6,8 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
 /**
  * Stores information about the extract process
- * For the moment date, number of rikishis
+ * For the moment extractdate
+ * TODO Add number of rikishis
  * Created by christophe on 14.06.17.
  */
 @DynamoDBTable(tableName = "EXTRACT_INFO")
@@ -16,7 +17,7 @@ public class ExtractInfo implements DomainObject {
     private int id;
 
     @DynamoDBAttribute
-    private String date;
+    private String extractdate;
 
     @Override
     public int getId() {
@@ -27,19 +28,19 @@ public class ExtractInfo implements DomainObject {
         this.id = id;
     }
 
-    public String getDate() {
-        return date;
+    public String getExtractdate() {
+        return extractdate;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setExtractdate(String extractdate) {
+        this.extractdate = extractdate;
     }
 
     @Override
     public String toString() {
         return "ExtractInfo{" +
             "id=" + id +
-            ", date='" + date + '\'' +
+            ", extractdate='" + extractdate + '\'' +
             '}';
     }
 }

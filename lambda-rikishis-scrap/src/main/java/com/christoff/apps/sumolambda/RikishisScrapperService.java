@@ -75,7 +75,7 @@ public class RikishisScrapperService extends ScrapperService {
         ExtractInfo extractInfo = new ExtractInfo();
         extractInfo.setId(EXTRACT_INFO_ID);
         LocalDate now = LocalDate.now();
-        extractInfo.setDate(now.format(DateTimeFormatter.ISO_DATE));
+        extractInfo.setExtractdate(now.format(DateTimeFormatter.ISO_DATE));
         LOGGER.info("Saving : " + extractInfo.toString());
         mapper.save(extractInfo);
     }

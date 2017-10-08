@@ -81,7 +81,7 @@ public class ExtractInfoReadWriteIT extends ReadWriteBaseIT {
         LocalDate date = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String today = date.format(formatter);
-        assertEquals(today, extractInfo.getDate(), "Extract info should be today in format yyyy-MM-dd");
+        assertEquals(today, extractInfo.getExtractdate(), "Extract info should be today in format yyyy-MM-dd");
     }
 
 }
