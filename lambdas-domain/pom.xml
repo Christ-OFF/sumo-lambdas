@@ -13,7 +13,6 @@
     <artifactId>lambdas-domain</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
-    <name>SumoLambdasDomain</name>
     <description>This library contains POJO mapped to DynamoDB tables</description>
 
     <dependencies>

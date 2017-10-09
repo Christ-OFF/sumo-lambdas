@@ -69,7 +69,7 @@ public class RikishisScrapperTest {
         hakuho.setShusshin("Mongolia, Ulan-Bator");
         hakuho.setHeight(192);
         hakuho.setWeight(152.9);
-        hakuho.setRank("Y2w");
+        hakuho.setSumoRank("Y2w");
         // When + Then
         should_scrap_expected_rikishi("hakuho.html", RIKISHI_PICTURE,hakuho);
     }
@@ -86,7 +86,7 @@ public class RikishisScrapperTest {
         tochiozan.setShusshin("Kochi-ken, Susaki-shi - Kochi-ken, Aki-shi");
         tochiozan.setHeight(188);
         tochiozan.setWeight(150.6);
-        tochiozan.setRank("M4e");
+        tochiozan.setSumoRank("M4e");
         should_scrap_expected_rikishi("tochiozan.html", RIKISHI_PICTURE, tochiozan);
     }
 
@@ -102,7 +102,7 @@ public class RikishisScrapperTest {
         harumafuji.setShusshin("Mongolia, Ulan-Bator - Mongolia, Gobi-Altai");
         harumafuji.setHeight(186);
         harumafuji.setWeight(133);
-        harumafuji.setRank("Y2e");
+        harumafuji.setSumoRank("Y2e");
         should_scrap_expected_rikishi("harumafuji.html", RIKISHI_PICTURE, harumafuji);
     }
 
@@ -133,7 +133,7 @@ public class RikishisScrapperTest {
         terunofuji.setShusshin("Mongolia, Ulan-Bator");
         terunofuji.setHeight(192);
         terunofuji.setWeight(158.5);
-        terunofuji.setRank("O1e");
+        terunofuji.setSumoRank("O1e");
         should_scrap_expected_rikishi("terunofuji.html", RIKISHI_PICTURE, terunofuji);
     }
 
@@ -148,7 +148,7 @@ public class RikishisScrapperTest {
         terunofuji.setShusshin("Mongolia, Ulan-Bator");
         terunofuji.setHeight(192);
         terunofuji.setWeight(158.5);
-        terunofuji.setRank("O1e");
+        terunofuji.setSumoRank("O1e");
         should_scrap_expected_rikishi("terunofuji_not_born.html", RIKISHI_PICTURE, terunofuji);
     }
 
@@ -176,7 +176,7 @@ public class RikishisScrapperTest {
         assertEquals(expected.getShusshin(),result.getShusshin());
         assertEquals(expected.getHeight(),result.getHeight());
         assertEquals(expected.getWeight(),result.getWeight(),0);
-        assertEquals(expected.getRank(),result.getRank());
+        assertEquals(expected.getSumoRank(), result.getSumoRank());
     }
 
 }
