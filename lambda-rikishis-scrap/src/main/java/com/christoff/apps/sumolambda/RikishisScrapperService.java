@@ -1,11 +1,14 @@
 package com.christoff.apps.sumolambda;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedScanList;
 import com.amazonaws.services.sns.AmazonSNS;
 import com.christoff.apps.scrappers.RikishisScrapParameters;
 import com.christoff.apps.scrappers.Scrapper;
 import com.christoff.apps.sumo.lambda.ScrapperService;
 import com.christoff.apps.sumo.lambda.domain.ExtractInfo;
+import com.christoff.apps.sumo.lambda.domain.Rikishi;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,15 +32,15 @@ public class RikishisScrapperService extends ScrapperService {
      * There is only on extract info (is it an anti-pattern ?)
      */
     private static final int EXTRACT_INFO_ID = 1;
-    private final
-    DynamoDBMapper mapper;
-    private final
-    RikishisScrapParameters parameters;
-    private final
-    Scrapper scrapper;
+
+    private final DynamoDBMapper mapper;
+    private final RikishisScrapParameters parameters;
+    private final Scrapper scrapper;
 
     @Autowired
-    public RikishisScrapperService(@NotNull DynamoDBMapper mapper, @NotNull AmazonSNS sns, @NotNull Scrapper scrapper,
+    public RikishisScrapperService(@NotNull DynamoDBMapper mapper,
+                                   @NotNull AmazonSNS sns,
+                                   @NotNull Scrapper scrapper,
                                    @NotNull RikishisScrapParameters parameters) {
         super(sns);
         this.mapper = mapper;
@@ -50,6 +53,8 @@ public class RikishisScrapperService extends ScrapperService {
      */
     public void scrap() {
         if (!parameters.getExtractInfoOnly()) {
+            LOGGER.info("First erase all rikishis");
+            cleanUpRikishis();
             LOGGER.info("Going to scrap Rikishi's list using " + parameters.toString());
             // Scrap the list of rikishis
             List<Integer> rikishisIds = scrapper.select();
@@ -65,6 +70,21 @@ public class RikishisScrapperService extends ScrapperService {
         } else {
             updateExtractInfo();
         }
+    }
+
+    /**
+     * Erase all rikishis before adding again
+     * Be careful a DeleteItemRequest cannot be made on all
+     * We could recreate table BUT we have to wait until table is ACTIVE again !
+     */
+    private void cleanUpRikishis() {
+        LOGGER.info("Erasing Rikishis one by one...");
+        DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
+        PaginatedScanList<Rikishi> result = mapper.scan(Rikishi.class, scanExpression);
+        for (Rikishi data : result) {
+            mapper.delete(data);
+        }
+        LOGGER.info("Erasing Rikishis one by one...done");
     }
 
     /**
