@@ -130,7 +130,7 @@ public class RikishisScrapper implements Scrapper {
                             result.setHeya(getLastValue(valueCell.text()));
                             break;
                         case SHIKONA:
-                            result.setName(getLastValue(valueCell.text()));
+                            result.setSumoName(getLastValue(valueCell.text()));
                             break;
                         case SHUSSHIN:
                             result.setShusshin(valueCell.text());
@@ -148,11 +148,11 @@ public class RikishisScrapper implements Scrapper {
             if (lastBasho != null) {
                 Elements cells = lastBasho.getElementsByTag(TABLE_CELL_SELECTOR);
                 if (cells != null && cells.size() == 6) {
-                    result.setRank(cells.get(RANK_COLUMN).text());
+                    result.setSumoRank(cells.get(RANK_COLUMN).text());
                 }
             }
             // Rikishi is done . but we may exclude him
-            if (FilterRank.includeRank(result.getRank())) {
+            if (FilterRank.includeRank(result.getSumoRank())) {
                 return result;
             } else {
                 LOGGER.warn("Excluding " + result.getId() + " because of rank");
