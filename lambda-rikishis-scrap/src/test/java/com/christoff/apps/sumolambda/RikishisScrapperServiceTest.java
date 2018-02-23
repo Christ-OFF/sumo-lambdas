@@ -53,7 +53,7 @@ public class RikishisScrapperServiceTest {
         // When
         tested.scrap();
         // Then
-        PublishRequest publishRequest = new PublishRequest(FAKE_PUBLISH_TOPIC, String.valueOf(FAKE_NUMBER));
+        PublishRequest publishRequest = new PublishRequest(FAKE_PUBLISH_TOPIC, "[" + String.valueOf(FAKE_NUMBER) + "]");
         Mockito.verify(sns).publish(publishRequest);
     }
 
