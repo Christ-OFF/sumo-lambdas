@@ -26,7 +26,11 @@ import java.util.regex.Pattern;
  */
 public class RikishisScrapper implements Scrapper {
 
-    public static final String FAKE_HOST = "http://0.0.0.0/";
+    private static final String FAKE_HOST = "http://0.0.0.0/";
+    /**
+     * Let's define some request properties to pretend we are a browser
+     */
+    private static final String USER_AGENT = "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:59.0) Gecko/20100101 Firefox/59.0";
     private static final int RIKISHI_COLUMN = 0;
     private static final String TABLE_LIST_BODY_SELECTOR = "body > div > div > table > tbody > tr > td.layoutright > table > tbody";
     private static final int DATA_NAME_COLUMN = 0;
@@ -42,6 +46,7 @@ public class RikishisScrapper implements Scrapper {
     private static final String TABLE_LINE_SELECTOR = "tr";
     private static final String TABLE_CELL_SELECTOR = "td";
     private static final int RANK_COLUMN = 1;
+
     private static final Logger LOGGER = Logger.getLogger(RikishisScrapper.class);
     /**
      * birthdate start with birthdate but contains age we neeed the date only
@@ -64,7 +69,10 @@ public class RikishisScrapper implements Scrapper {
         LOGGER.info("Going to select " + scrapParameters.getFullListUrl());
         List<Integer> result = new ArrayList<>();
         try {
-            Document mainPage = Jsoup.connect(scrapParameters.getFullListUrl()).get();
+            Document mainPage = Jsoup
+                .connect(scrapParameters.getFullListUrl())
+                .userAgent(USER_AGENT)
+                .get();
             Elements tableBody = mainPage.select(TABLE_LIST_BODY_SELECTOR);
             if (tableBody == null) {
                 LOGGER.warn("Unable to find Rikishi table returning empty result");
@@ -105,7 +113,9 @@ public class RikishisScrapper implements Scrapper {
         String rikishiUrl = scrapParameters.getFullRikishiUrl() + id;
         try {
             LOGGER.info("Going to get Rikishi detail " + rikishiUrl);
-            Document mainPage = Jsoup.connect(rikishiUrl).get();
+            Document mainPage = Jsoup
+                .connect(rikishiUrl)
+                .userAgent(USER_AGENT).get();
             Elements rikishiData = mainPage.select(TABLE_RIKISHIDATA);
             if (rikishiData == null || rikishiData.size() != 1) {
                 LOGGER.warn("No rikishi data found. Returning null");
