@@ -10,6 +10,9 @@ import org.jetbrains.annotations.Nullable;
  */
 public class RikishisScrapParameters implements ScrapPublishParameters {
 
+    /**
+     * We may store in code some default values
+     */
     public static final String DEFAULT_BASE_URL = "http://sumodb.sumogames.de/";
     public static final String DEFAULT_LIST_QUERY = "Rikishi.aspx?shikona=&heya=-1&shusshin=-1&b=-1&high=-1&hd=-1&entry=-1&intai=999999&sort=1";
     public static final String DEFAULT_RIKISHI_QUERY = "Rikishi.aspx?r=";
@@ -22,7 +25,8 @@ public class RikishisScrapParameters implements ScrapPublishParameters {
     private String listurl;
     private String rikishiurl;
     private String extractInfoOnly;
-    private String publishTopic;
+    private String publishDetailTopic;
+    private String publishPictureTopic;
 
     /**
      * Only builder can build
@@ -42,9 +46,10 @@ public class RikishisScrapParameters implements ScrapPublishParameters {
         return Boolean.valueOf(extractInfoOnly);
     }
 
-    public String getPublishTopic() {
-        return publishTopic;
+    public String getPublishDetailTopic() {
+        return publishDetailTopic;
     }
+    public String getPublishPictureTopic() { return publishPictureTopic; }
 
     @Override
     public String toString() {
@@ -53,7 +58,8 @@ public class RikishisScrapParameters implements ScrapPublishParameters {
             ", listurl='" + listurl + '\'' +
             ", rikishiurl='" + rikishiurl + '\'' +
             ", extractInfoOnly='" + extractInfoOnly + '\'' +
-            ", publishTopic='" + publishTopic + '\'' +
+            ", publishDetailTopic='" + publishDetailTopic + '\'' +
+            ", publishPictureTopic='" + publishPictureTopic + '\'' +
             '}';
     }
 
@@ -66,14 +72,15 @@ public class RikishisScrapParameters implements ScrapPublishParameters {
         /**
          * Parameters cannot be made null as this is useless !
          */
-        public Builder(@NotNull String publishTopic) {
+        public Builder(@NotNull String publishDetailTopic, @NotNull String publishPictureTopic) {
             builded = new RikishisScrapParameters();
             builded.baseurl = DEFAULT_BASE_URL;
             builded.listurl = DEFAULT_LIST_QUERY;
             builded.rikishiurl = DEFAULT_RIKISHI_QUERY;
             builded.extractInfoOnly = DEFAULT_EXTRACTONLY;
             // Value without default (topic is not public)
-            builded.publishTopic = publishTopic;
+            builded.publishDetailTopic = publishDetailTopic;
+            builded.publishPictureTopic = publishPictureTopic;
         }
 
         public Builder withBaseUrl(@Nullable String url) {

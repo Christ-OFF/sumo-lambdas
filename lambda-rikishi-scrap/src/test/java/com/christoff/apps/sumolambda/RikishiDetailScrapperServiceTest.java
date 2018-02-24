@@ -14,8 +14,9 @@ import org.mockito.MockitoAnnotations;
 
 class RikishiDetailScrapperServiceTest {
 
-    public static final String FAKE_PUBLISH_TOPIC = "FAKE_PUBLISH_TOPIC";
-    public static final int FAKE_NUMBER = 42;
+    private static final String FAKE_PUBLISH_DETAIL_TOPIC = "FAKE_PUBLISH_DETAIL_TOPIC";
+    private static final String FAKE_PUBLISH_PICTURE_TOPIC = "FAKE_PUBLISH_PICTURE_TOPIC";
+    private static final int FAKE_NUMBER = 42;
 
     @Mock
     private DynamoDBMapper dynamoDBMapper;
@@ -32,7 +33,7 @@ class RikishiDetailScrapperServiceTest {
     @BeforeEach
     public void initMocks() {
         MockitoAnnotations.initMocks(this);
-        params = new RikishisScrapParameters.Builder(FAKE_PUBLISH_TOPIC).build();
+        params = new RikishisScrapParameters.Builder(FAKE_PUBLISH_DETAIL_TOPIC,FAKE_PUBLISH_PICTURE_TOPIC).build();
         tested = new RikishiDetailScrapperService(dynamoDBMapper, sns, scrapper, params);
     }
 
@@ -56,11 +57,7 @@ class RikishiDetailScrapperServiceTest {
         tested.scrap(FAKE_NUMBER);
         // Then
         Mockito.verify(dynamoDBMapper).save(rikishi);
-        PublishRequest req = new PublishRequest()
-            .withTopicArn(FAKE_PUBLISH_TOPIC)
-            .withMessage(String.valueOf(FAKE_NUMBER));
-        req.setTopicArn(FAKE_PUBLISH_TOPIC);
-        Mockito.verify(sns).publish(Mockito.eq(req));
+        Mockito.verify(sns).publish(FAKE_PUBLISH_PICTURE_TOPIC,String.valueOf(FAKE_NUMBER));
     }
 
 }

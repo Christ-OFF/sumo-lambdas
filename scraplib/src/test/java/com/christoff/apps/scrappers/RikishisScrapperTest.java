@@ -10,7 +10,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URL;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -27,7 +26,8 @@ public class RikishisScrapperTest {
      * for the test I have ONE picture, could have more...
      */
     private static final String RIKISHI_PICTURE = "42.jpg";
-    public static final String FAKE_PUBLISH_TOPIC = "FAKE_PUBLISH_TOPIC";
+    private static final String FAKE_PUBLISH_DETAIL_TOPIC = "FAKE_PUBLISH_DETAIL_TOPIC";
+    private static final String FAKE_PUBLISH_PICTURE_TOPIC = "FAKE_PUBLISH_PICTURE_TOPIC";
 
     private RikishisScrapper tested;
 
@@ -36,7 +36,9 @@ public class RikishisScrapperTest {
 
     @Before
     public void setup(){
-        RikishisScrapParameters params = new RikishisScrapParameters.Builder(FAKE_PUBLISH_TOPIC).withBaseUrl("http://localhost:8080/").build();
+        RikishisScrapParameters params = new RikishisScrapParameters.Builder(   FAKE_PUBLISH_DETAIL_TOPIC,
+                                                                                FAKE_PUBLISH_PICTURE_TOPIC)
+            .withBaseUrl("http://localhost:8080/").build();
         tested = new RikishisScrapper(params);
     }
 
@@ -57,7 +59,7 @@ public class RikishisScrapperTest {
     }
 
     @Test
-    public void should_scrap_hakuho() throws IOException, ParseException {
+    public void should_scrap_hakuho() throws IOException {
         // Given
         Rikishi hakuho = new Rikishi();
         hakuho.setId(42);
@@ -75,7 +77,7 @@ public class RikishisScrapperTest {
     }
 
     @Test
-    public void should_scrap_tochiozan() throws IOException, ParseException {
+    public void should_scrap_tochiozan() throws IOException {
         Rikishi tochiozan = new Rikishi();
         tochiozan.setId(42);
         tochiozan.setRealName("KAGEYAMA Yuichiro");
@@ -91,7 +93,7 @@ public class RikishisScrapperTest {
     }
 
     @Test
-    public void should_scrap_harumafuji() throws IOException, ParseException {
+    public void should_scrap_harumafuji() throws IOException {
         Rikishi harumafuji = new Rikishi();
         harumafuji.setId(42);
         harumafuji.setRealName("DAVAANYAM Byambadorj");
@@ -107,7 +109,7 @@ public class RikishisScrapperTest {
     }
 
     @Test
-    public void should_exclude_beginner_hakuho() throws IOException, ParseException {
+    public void should_exclude_beginner_hakuho() throws IOException {
         // Mock
         URL url = Resources.getResource("hakuho_beginner.html");
         String body = Resources.toString(url, Charsets.UTF_8);
@@ -122,7 +124,7 @@ public class RikishisScrapperTest {
     }
 
     @Test
-    public void should_scrap_terunofuji() throws IOException, ParseException {
+    public void should_scrap_terunofuji() throws IOException {
         Rikishi terunofuji = new Rikishi();
         terunofuji.setId(69);
         terunofuji.setRealName("GANERDENE Gantulga");
@@ -138,7 +140,7 @@ public class RikishisScrapperTest {
     }
 
     @Test
-    public void should_null_birhtdate_on_invalid() throws IOException, ParseException {
+    public void should_null_birhtdate_on_invalid() throws IOException {
         Rikishi terunofuji = new Rikishi();
         terunofuji.setId(69);
         terunofuji.setRealName("GANERDENE Gantulga");

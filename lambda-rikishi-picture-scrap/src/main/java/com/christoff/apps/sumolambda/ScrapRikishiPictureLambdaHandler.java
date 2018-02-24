@@ -10,6 +10,7 @@ import com.christoff.apps.scrappers.RikishisPicturesScrapParameters;
 import com.christoff.apps.scrappers.Scrapper;
 import com.christoff.apps.sumo.lambda.LambdaScrapBase;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.boot.Banner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -71,12 +72,34 @@ public class ScrapRikishiPictureLambdaHandler extends LambdaScrapBase implements
         // Beans and services
         RikishiPictureScrapperService service = ctx.getBean(RikishiPictureScrapperService.class);
         //
-        Integer id = rikishiIdFromEvent(event);
+        Integer id = firstRikishiIdFromEvent(event);
         if (id != null) {
             LOGGER.info("Going to scrap picture for " + id);
             service.scrap(id);
         }
         return null;
+    }
+
+    /**
+     * Common method with heavy null checks to extract id from message
+     *
+     * @param event message containing raw id
+     * @return id or NULL
+     */
+    @Nullable
+    private Integer firstRikishiIdFromEvent(SNSEvent event) {
+        if (event == null
+            || event.getRecords() == null
+            || event.getRecords().isEmpty()
+            || event.getRecords().get(0) == null
+            || event.getRecords().get(0).getSNS() == null
+            || event.getRecords().get(0).getSNS().getMessage() == null
+            || event.getRecords().get(0).getSNS().getMessage().isEmpty()) {
+            LOGGER.error("Event is null or empty");
+            return null;
+        } else {
+            return Integer.parseInt(event.getRecords().get(0).getSNS().getMessage());
+        }
     }
 
 }
