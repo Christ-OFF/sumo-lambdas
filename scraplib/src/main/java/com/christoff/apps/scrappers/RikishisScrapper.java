@@ -26,6 +26,12 @@ import java.util.regex.Pattern;
  */
 public class RikishisScrapper implements Scrapper {
 
+    /**
+     * We can't afford to have a very long > 60sec http call
+     * as the lambda itself will timeout !
+     */
+    private static final int TIMEOUT_MS = 30 * 1000;
+
     private static final String FAKE_HOST = "http://0.0.0.0/";
     /**
      * Let's define some request properties to pretend we are a browser
@@ -72,6 +78,7 @@ public class RikishisScrapper implements Scrapper {
             Document mainPage = Jsoup
                 .connect(scrapParameters.getFullListUrl())
                 .userAgent(USER_AGENT)
+                .timeout(TIMEOUT_MS)
                 .get();
             Elements tableBody = mainPage.select(TABLE_LIST_BODY_SELECTOR);
             if (tableBody == null) {
@@ -115,7 +122,9 @@ public class RikishisScrapper implements Scrapper {
             LOGGER.info("Going to get Rikishi detail " + rikishiUrl);
             Document mainPage = Jsoup
                 .connect(rikishiUrl)
-                .userAgent(USER_AGENT).get();
+                .userAgent(USER_AGENT)
+                .timeout(TIMEOUT_MS)
+                .get();
             Elements rikishiData = mainPage.select(TABLE_RIKISHIDATA);
             if (rikishiData == null || rikishiData.size() != 1) {
                 LOGGER.warn("No rikishi data found. Returning null");
@@ -218,7 +227,6 @@ public class RikishisScrapper implements Scrapper {
      * Dedicated method to manage height and weight
      * TODO should refactor this. I hate method altering their params
      *
-     * @param result
      * @param valueCell the HTML cell
      */
     private void handleHeightWeight(Rikishi result, Element valueCell) {

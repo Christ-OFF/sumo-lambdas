@@ -9,8 +9,7 @@ import com.christoff.apps.scrappers.Scrapper;
 import com.christoff.apps.sumo.lambda.ScrapperService;
 import com.christoff.apps.sumo.lambda.domain.ExtractInfo;
 import com.christoff.apps.sumo.lambda.domain.Rikishi;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.christoff.apps.sumo.lambda.sns.RikishisListMethods;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,15 +62,8 @@ public class RikishisScrapperService extends ScrapperService {
             // Emmit message with list of all rikishis ids
             if (rikishisIds != null && !rikishisIds.isEmpty()) {
                 LOGGER.info("Scraped list of " + rikishisIds.size() + " Rikishis ");
-                ObjectMapper objectMapper = new ObjectMapper();
-                String jsonStr = null;
-                try {
-                    jsonStr = objectMapper.writeValueAsString(rikishisIds);
-                    publishEvent(parameters, jsonStr);
-                    updateExtractInfo();
-                } catch (JsonProcessingException e) {
-                    LOGGER.error("Unable to JSON the Ids list aborting.",e);
-                }
+                RikishisListMethods.publishRikishisListEvent(sns, parameters.getPublishDetailTopic(), rikishisIds);
+                updateExtractInfo();
             }
         } else {
             updateExtractInfo();

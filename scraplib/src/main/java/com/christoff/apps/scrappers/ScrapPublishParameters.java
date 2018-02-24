@@ -8,7 +8,7 @@ public interface ScrapPublishParameters {
     /**
      * this is a parameter as it must not be hard-coded
      *
-     * @return
+     * @return the topic arn to ask for a detail to be retrieved
      */
-    String getPublishTopic();
+    String getPublishDetailTopic();
 }

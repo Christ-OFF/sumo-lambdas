@@ -1,12 +1,9 @@
 package com.christoff.apps.sumo.lambda;
 
 import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.PublishResult;
-import com.christoff.apps.scrappers.ScrapPublishParameters;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.util.Assert;
 
 public abstract class ScrapperService {
@@ -21,25 +18,20 @@ public abstract class ScrapperService {
 
     /**
      * Publish that a Rikishi detail must be treated
-     *
-     * @param content to be publish as is
+     * @param id to be publish as is
      */
-    protected @Nullable
-    PublishResult publishEvent(ScrapPublishParameters params, String content) {
+    protected void publishEvent(String topic, String id) {
         Assert.notNull(sns, "Cannot publish with a null sns");
-        PublishRequest publishRequest = new PublishRequest(params.getPublishTopic(), content);
-        LOGGER.info("Going to publish " + publishRequest.toString());
+        LOGGER.info("Going to publish " + id + " to " + topic);
         try {
-            PublishResult publishResult = sns.publish(publishRequest);
+            PublishResult publishResult = sns.publish(topic,id);
             if (publishResult != null && publishResult.getMessageId() != null) {
-                LOGGER.info("MessageId - " + publishResult.getMessageId() + " sent : " + content);
+                LOGGER.info("MessageId - " + publishResult.getMessageId() + " sent : " + id);
             } else {
-                LOGGER.warn("Message for " + content + " was NOT sent");
+                LOGGER.warn("Message for " + id + " was NOT sent");
             }
-            return publishResult;
         } catch (Exception e) {
-            LOGGER.error("Publish error with " + publishRequest.toString(), e);
-            return null;
+            LOGGER.error("Publish error with " + topic, e);
         }
     }
 }

@@ -9,12 +9,15 @@ import com.christoff.apps.scrappers.RikishisScrapParameters;
 import com.christoff.apps.scrappers.RikishisScrapper;
 import com.christoff.apps.scrappers.Scrapper;
 import com.christoff.apps.sumo.lambda.LambdaScrapBase;
+import com.christoff.apps.sumo.lambda.sns.RikishisListMethods;
 import org.apache.log4j.Logger;
 import org.springframework.boot.Banner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+
+import java.util.List;
 
 /**
  * The AWS Handler is a spring boot application
@@ -44,7 +47,8 @@ public class ScrapRikishiLambdaHandler extends LambdaScrapBase implements Reques
      */
     @Bean
     public RikishisScrapParameters params() {
-        return new RikishisScrapParameters.Builder(System.getenv("publishtopic"))
+        return new RikishisScrapParameters.Builder(
+            System.getenv(PUBLISH_DETAIL_TOPIC),System.getenv(PUBLISH_PICTURE_TOPIC))
             .withBaseUrl(System.getenv("baseurl"))
             .withListUrl(System.getenv("listurl"))
             .withRikishiUrl(System.getenv("rikishiurl"))
@@ -72,11 +76,16 @@ public class ScrapRikishiLambdaHandler extends LambdaScrapBase implements Reques
         ApplicationContext ctx = getApplicationContext(new String[]{});
         // Beans and services
         RikishiDetailScrapperService service = ctx.getBean(RikishiDetailScrapperService.class);
-        //
-        Integer id = rikishiIdFromEvent(event);
-        if (id != null) {
-            LOGGER.info("Going to scrap detail for " + id);
-            service.scrap(id);
+        RikishisScrapParameters params = ctx.getBean(RikishisScrapParameters.class);
+        AmazonSNS sns = ctx.getBean(AmazonSNS.class);
+        // We now receive a List<Integer> as JSON instead of a single id
+        List<Integer> ids = getRikishiIdFromEvent(event);
+        if (!ids.isEmpty()) {
+            LOGGER.info("Going to scrap detail for " + ids.get(0) + " " + (ids.size() -1) + " remains");
+            service.scrap(ids.get(0));
+            RikishisListMethods.publishRikishisListEvent(sns,params.getPublishDetailTopic(),ids.subList(1,ids.size()));
+        } else {
+            LOGGER.info("No Rikishis to process");
         }
         return null;
     }

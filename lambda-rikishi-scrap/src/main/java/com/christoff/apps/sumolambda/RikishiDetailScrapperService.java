@@ -50,7 +50,7 @@ public class RikishiDetailScrapperService extends ScrapperService {
         } else {
             mapper.save(detail);
             LOGGER.info("Rikishi " + rikishiId + " detail saved.");
-            publishEvent(parameters, String.valueOf(rikishiId));
+            publishEvent(parameters.getPublishPictureTopic(), String.valueOf(rikishiId));
         }
 
     }
