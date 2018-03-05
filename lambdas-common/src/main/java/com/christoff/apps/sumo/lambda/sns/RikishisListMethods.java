@@ -66,7 +66,7 @@ public class RikishisListMethods {
         Assert.notNull(sns, "Cannot publish with a null sns");
         //
         String idsJson = getIdsAsJsonString(ids);
-        if (idsJson == null || idsJson.length() == 0) {
+        if (idsJson == null || idsJson.isEmpty()) {
             LOGGER.info("No Ids to process. No message sent");
         } else {
             LOGGER.info("Going to publish " + ids.size() + " to " + topic);

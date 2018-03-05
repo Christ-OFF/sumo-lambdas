@@ -64,6 +64,8 @@ public class RikishisScrapperService extends ScrapperService {
                 LOGGER.info("Scraped list of " + rikishisIds.size() + " Rikishis ");
                 RikishisListMethods.publishRikishisListEvent(sns, parameters.getPublishDetailTopic(), rikishisIds);
                 updateExtractInfo();
+            } else {
+                LOGGER.warn("No rikishis in scrapped list from " + parameters.toString());
             }
         } else {
             updateExtractInfo();
