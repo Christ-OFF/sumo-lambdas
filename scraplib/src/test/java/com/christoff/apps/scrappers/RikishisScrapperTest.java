@@ -54,8 +54,8 @@ public class RikishisScrapperTest {
         // When
         List<Integer> result = tested.select();
         // Then
-        assertEquals("Should have two results",3,result.size());
-        assertEquals("Should retrieve the first rikishi", 8948, result.get(0).intValue());
+        assertEquals("Should have one active good rank result",1,result.size());
+        assertEquals("Should retrieve the first rikishi", 12094, result.get(0).intValue());
     }
 
     @Test
