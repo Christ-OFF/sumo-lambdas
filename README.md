@@ -33,3 +33,14 @@ new AwsClientBuilder.EndpointConfiguration("http://localhost:8000", "us-west-2")
 - `aws dynamodb describe-table --table-name RIKISHIS` 
 - `aws dynamodb describe-table --table-name RIKISHIS_PICTURES` 
 
+# Terraform
+
+## Prepare
+
+## Commands
+
+terraform workspace list
+terraform workspace new dev
+terraform init -var-file='../terraform.tfvars'
+terraform plan -var-file='../terraform.tfvars'
+terraform apply -var-file='../terraform.tfvars'
