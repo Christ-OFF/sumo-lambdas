@@ -48,6 +48,7 @@ public class ScrapRikishiPictureLambdaHandler extends LambdaScrapBase implements
         return new RikishisPicturesScrapParameters.Builder()
             .withBaseUrl(System.getenv("baseurl"))
             .withImageUrl(System.getenv("imageurl"))
+            .withBucket(System.getenv("bucket"))
             .build();
     }
 
