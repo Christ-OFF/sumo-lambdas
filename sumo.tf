@@ -23,6 +23,10 @@ provider "aws" {
 # RESOURCES
 ##################################################################################
 
+############
+# DynamoDB
+############
+
 resource "aws_dynamodb_table" "rikishis-table" {
     name = "RIKISHIS"
     read_capacity = 5
@@ -54,6 +58,10 @@ resource "aws_dynamodb_table" "extractinfo-table" {
     }
 }
 
+############
+#    S3
+############
+
 resource "aws_s3_bucket" "lambdas-bucket" {
     bucket = "lambdas.sumo.christoff.net"
     acl = "private"
@@ -74,7 +82,7 @@ resource "aws_s3_bucket_object" "lambda-rikishis-scrap-jar" {
     key = "lambda-rikishis-scrap"
     bucket = "${aws_s3_bucket.lambdas-bucket.id}"
     source = "./lambda-rikishis-scrap/target/lambda-rikishis-scrap-0.0.1-SNAPSHOT.jar"
-    content_type = "'application/java-archive'"
+    content_type = "application/java-archive"
     acl = "private"
     # etag is here to detect changes
     etag = "${md5(file("./lambda-rikishis-scrap/target/lambda-rikishis-scrap-0.0.1-SNAPSHOT.jar"))}"
@@ -87,7 +95,7 @@ resource "aws_s3_bucket_object" "lambda-rikishi-scrap-jar" {
     key = "lambda-rikishi-scrap"
     bucket = "${aws_s3_bucket.lambdas-bucket.id}"
     source = "./lambda-rikishi-scrap/target/lambda-rikishi-scrap-0.0.1-SNAPSHOT.jar"
-    content_type = "'application/java-archive'"
+    content_type = "application/java-archive"
     acl = "private"
     # etag is here to detect changes
     etag = "${md5(file("./lambda-rikishi-scrap/target/lambda-rikishi-scrap-0.0.1-SNAPSHOT.jar"))}"
@@ -100,7 +108,7 @@ resource "aws_s3_bucket_object" "lambda-rikishi-picture-scrap-jar" {
     key = "lambda-rikishi-picture-scrap"
     bucket = "${aws_s3_bucket.lambdas-bucket.id}"
     source = "./lambda-rikishi-picture-scrap/target/lambda-rikishi-picture-scrap-0.0.1-SNAPSHOT.jar"
-    content_type = "'application/java-archive'"
+    content_type = "application/java-archive"
     acl = "private"
     # etag is here to detect changes
     etag = "${md5(file("./lambda-rikishi-picture-scrap/target/lambda-rikishi-picture-scrap-0.0.1-SNAPSHOT.jar"))}"
@@ -108,6 +116,23 @@ resource "aws_s3_bucket_object" "lambda-rikishi-picture-scrap-jar" {
         sumo = "scrap"
     }
 }
+
+resource "aws_s3_bucket_object" "lambda-extract-info-get-zip" {
+    key = "lambda-extract-info-get"
+    bucket = "${aws_s3_bucket.lambdas-bucket.id}"
+    source = "./extract-info-get/target/extract-info-get-0.0.1-SNAPSHOT-assembly.zip"
+    content_type = "application/zip"
+    acl = "private"
+    # etag is here to detect changes
+    etag = "${md5(file("./extract-info-get/target/extract-info-get-0.0.1-SNAPSHOT-assembly.zip"))}"
+    tags {
+        sumo = "get"
+    }
+}
+
+############
+#  Roles
+############
 
 resource "aws_iam_role" "lambdas-scrap-role" {
     name = "lambdas-scrap"
@@ -149,6 +174,40 @@ resource "aws_iam_role_policy_attachment" "lambdas-scrap-role-snsfullacess-attac
     policy_arn = "arn:aws:iam::aws:policy/AmazonSNSFullAccess"
 }
 
+resource "aws_iam_role" "lambdas-get-role" {
+    name = "lambdas-get"
+    description = "Role for lambdas reading content"
+    assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "lambdas-get-role-cloudwatchfullaccess-attach" {
+    role = "${aws_iam_role.lambdas-get-role.name}"
+    policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "lambdas-get-role-dynamo-ro-attach" {
+    role = "${aws_iam_role.lambdas-get-role.name}"
+    policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess"
+}
+
+############
+#  Topics
+############
+
 resource "aws_sns_topic" "rikishi-create-update-detail-topic" {
     name = "rikishi-create-update-detail"
 }
@@ -157,6 +216,9 @@ resource "aws_sns_topic" "rikishi-create-update-picture-topic" {
     name = "rikishi-create-update-picture"
 }
 
+############
+#  Events
+############
 
 resource "aws_cloudwatch_event_rule" "every-month-eventrule" {
     name = "every-month"
@@ -164,6 +226,10 @@ resource "aws_cloudwatch_event_rule" "every-month-eventrule" {
     schedule_expression = "cron(0 0 22 * ? *)"
     is_enabled = "true"
 }
+
+############
+# Rikishis
+############
 
 resource "aws_cloudwatch_log_group" "rikishis-scrap-log-group" {
     name = "/aws/lambda/${aws_lambda_function.rikishis-scrap-lambda.function_name}"
@@ -226,6 +292,10 @@ resource "aws_lambda_permission" "allow_cloudwatch-rikishis-scrap-lambda-permiss
     source_arn     = "${aws_cloudwatch_event_rule.every-month-eventrule.arn}"
 }
 
+############
+# Rikishi
+############
+
 resource "aws_cloudwatch_log_group" "rikishi-scrap-log-group" {
     name = "/aws/lambda/${aws_lambda_function.rikishi-scrap-lambda.function_name}"
     retention_in_days = "60"
@@ -278,6 +348,10 @@ resource "aws_sns_topic_subscription" "rikishi-scrap-lambda-target" {
     endpoint  = "${aws_lambda_function.rikishi-scrap-lambda.arn}"
 }
 
+############
+# Picture
+############
+
 resource "aws_cloudwatch_log_group" "rikishi-picture-scrap-log-group" {
     name = "/aws/lambda/${aws_lambda_function.rikishi-picture-scrap-lambda.function_name}"
     retention_in_days = "60"
@@ -327,6 +401,41 @@ resource "aws_sns_topic_subscription" "rikishi-picture-scrap-lambda-target" {
     topic_arn = "${aws_sns_topic.rikishi-create-update-picture-topic.arn}"
     protocol  = "lambda"
     endpoint  = "${aws_lambda_function.rikishi-picture-scrap-lambda.arn}"
+}
+
+############
+# Extract
+############
+
+resource "aws_cloudwatch_log_group" "extract-info-get-log-group" {
+    name = "/aws/lambda/${aws_lambda_function.extract-info-get-lambda.function_name}"
+    retention_in_days = "7"
+    tags {
+        sumo = "get"
+    }
+}
+
+resource "aws_lambda_function" "extract-info-get-lambda" {
+
+    function_name = "extract-info-get"
+    description = "Reads Extract info date from DynamoDB"
+
+    s3_bucket = "${aws_s3_bucket.lambdas-bucket.bucket}"
+    s3_key = "${aws_s3_bucket_object.lambda-extract-info-get-zip.key}"
+
+    runtime = "nodejs6.10"
+    handler = "main.handler"
+
+    role = "${aws_iam_role.lambdas-get-role.arn}"
+
+    timeout = "5"
+    memory_size = "128"
+
+    source_code_hash = "${base64sha256(file("./extract-info-get/target/extract-info-get-0.0.1-SNAPSHOT-assembly.zip"))}"
+
+    tags {
+        sumo = "get"
+    }
 }
 
 ##################################################################################
