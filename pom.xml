@@ -19,6 +19,7 @@
         <module>lambda-rikishis-scrap</module>
         <module>lambda-rikishi-scrap</module>
         <module>lambda-rikishi-picture-scrap</module>
+        <module>extract-info-get</module>
     </modules>
 
     <properties>
