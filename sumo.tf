@@ -27,7 +27,7 @@ provider "aws" {
 # DynamoDB
 ############
 
-resource "aws_dynamodb_table" "rikishis-table" {
+resource "aws_dynamodb_table" "rikishis" {
     name = "RIKISHIS"
     read_capacity = 5
     write_capacity = 5
@@ -42,7 +42,7 @@ resource "aws_dynamodb_table" "rikishis-table" {
     }
 }
 
-resource "aws_dynamodb_table" "extractinfo-table" {
+resource "aws_dynamodb_table" "extractinfo" {
     name = "EXTRACT_INFO"
     read_capacity = 5
     write_capacity = 5
@@ -62,17 +62,19 @@ resource "aws_dynamodb_table" "extractinfo-table" {
 #    S3
 ############
 
-resource "aws_s3_bucket" "lambdas-bucket" {
+resource "aws_s3_bucket" "lambdas" {
     bucket = "lambdas.sumo.christoff.net"
     acl = "private"
+    force_destroy = "true"
     tags {
         sumo = "scrap"
     }
 }
 
-resource "aws_s3_bucket" "rikishis-bucket" {
+resource "aws_s3_bucket" "rikishis" {
     bucket = "rikishis.sumo.christoff.net"
     acl = "private"
+    force_destroy = "true"
     tags {
         sumo = "scrap"
     }
@@ -80,7 +82,7 @@ resource "aws_s3_bucket" "rikishis-bucket" {
 
 resource "aws_s3_bucket_object" "lambda-rikishis-scrap-jar" {
     key = "lambda-rikishis-scrap"
-    bucket = "${aws_s3_bucket.lambdas-bucket.id}"
+    bucket = "${aws_s3_bucket.lambdas.id}"
     source = "./lambda-rikishis-scrap/target/lambda-rikishis-scrap-0.0.1-SNAPSHOT.jar"
     content_type = "application/java-archive"
     acl = "private"
@@ -93,7 +95,7 @@ resource "aws_s3_bucket_object" "lambda-rikishis-scrap-jar" {
 
 resource "aws_s3_bucket_object" "lambda-rikishi-scrap-jar" {
     key = "lambda-rikishi-scrap"
-    bucket = "${aws_s3_bucket.lambdas-bucket.id}"
+    bucket = "${aws_s3_bucket.lambdas.id}"
     source = "./lambda-rikishi-scrap/target/lambda-rikishi-scrap-0.0.1-SNAPSHOT.jar"
     content_type = "application/java-archive"
     acl = "private"
@@ -106,7 +108,7 @@ resource "aws_s3_bucket_object" "lambda-rikishi-scrap-jar" {
 
 resource "aws_s3_bucket_object" "lambda-rikishi-picture-scrap-jar" {
     key = "lambda-rikishi-picture-scrap"
-    bucket = "${aws_s3_bucket.lambdas-bucket.id}"
+    bucket = "${aws_s3_bucket.lambdas.id}"
     source = "./lambda-rikishi-picture-scrap/target/lambda-rikishi-picture-scrap-0.0.1-SNAPSHOT.jar"
     content_type = "application/java-archive"
     acl = "private"
@@ -119,7 +121,7 @@ resource "aws_s3_bucket_object" "lambda-rikishi-picture-scrap-jar" {
 
 resource "aws_s3_bucket_object" "lambda-extract-info-get-zip" {
     key = "lambda-extract-info-get"
-    bucket = "${aws_s3_bucket.lambdas-bucket.id}"
+    bucket = "${aws_s3_bucket.lambdas.id}"
     source = "./extract-info-get/target/extract-info-get-0.0.1-SNAPSHOT-assembly.zip"
     content_type = "application/zip"
     acl = "private"
@@ -130,11 +132,24 @@ resource "aws_s3_bucket_object" "lambda-extract-info-get-zip" {
     }
 }
 
+resource "aws_s3_bucket_object" "lambda-rikishis-get-zip" {
+    key = "rikishis-get"
+    bucket = "${aws_s3_bucket.lambdas.id}"
+    source = "./rikishis-get/target/rikishis-get-0.0.1-SNAPSHOT-assembly.zip"
+    content_type = "application/zip"
+    acl = "private"
+    # etag is here to detect changes
+    etag = "${md5(file("./rikishis-get/target/rikishis-get-0.0.1-SNAPSHOT-assembly.zip"))}"
+    tags {
+        sumo = "get"
+    }
+}
+
 ############
 #  Roles
 ############
 
-resource "aws_iam_role" "lambdas-scrap-role" {
+resource "aws_iam_role" "lambdas-scrap" {
     name = "lambdas-scrap"
     description = "Role for lambdas scrapping content"
     assume_role_policy = <<EOF
@@ -154,27 +169,27 @@ resource "aws_iam_role" "lambdas-scrap-role" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "lambdas-scrap-role-s3fullaccess-attach" {
-    role = "${aws_iam_role.lambdas-scrap-role.name}"
+resource "aws_iam_role_policy_attachment" "lambdas-scrap-role-s3fullaccess" {
+    role = "${aws_iam_role.lambdas-scrap.name}"
     policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
 
-resource "aws_iam_role_policy_attachment" "lambdas-scrap-role-dynamodbfullaccess-attach" {
-    role = "${aws_iam_role.lambdas-scrap-role.name}"
+resource "aws_iam_role_policy_attachment" "lambdas-scrap-role-dynamodbfullaccess" {
+    role = "${aws_iam_role.lambdas-scrap.name}"
     policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
 }
 
-resource "aws_iam_role_policy_attachment" "lambdas-scrap-role-cloudwatchfullaccess-attach" {
-    role = "${aws_iam_role.lambdas-scrap-role.name}"
+resource "aws_iam_role_policy_attachment" "lambdas-scrap-role-cloudwatchfullaccess" {
+    role = "${aws_iam_role.lambdas-scrap.name}"
     policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
 }
 
-resource "aws_iam_role_policy_attachment" "lambdas-scrap-role-snsfullacess-attach" {
-    role = "${aws_iam_role.lambdas-scrap-role.name}"
+resource "aws_iam_role_policy_attachment" "lambdas-scrap-role-snsfullacess" {
+    role = "${aws_iam_role.lambdas-scrap.name}"
     policy_arn = "arn:aws:iam::aws:policy/AmazonSNSFullAccess"
 }
 
-resource "aws_iam_role" "lambdas-get-role" {
+resource "aws_iam_role" "lambdas-get" {
     name = "lambdas-get"
     description = "Role for lambdas reading content"
     assume_role_policy = <<EOF
@@ -194,13 +209,13 @@ resource "aws_iam_role" "lambdas-get-role" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "lambdas-get-role-cloudwatchfullaccess-attach" {
-    role = "${aws_iam_role.lambdas-get-role.name}"
+resource "aws_iam_role_policy_attachment" "lambdas-get-role-cloudwatchfullaccess" {
+    role = "${aws_iam_role.lambdas-get.name}"
     policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
 }
 
 resource "aws_iam_role_policy_attachment" "lambdas-get-role-dynamo-ro-attach" {
-    role = "${aws_iam_role.lambdas-get-role.name}"
+    role = "${aws_iam_role.lambdas-get.name}"
     policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess"
 }
 
@@ -208,11 +223,11 @@ resource "aws_iam_role_policy_attachment" "lambdas-get-role-dynamo-ro-attach" {
 #  Topics
 ############
 
-resource "aws_sns_topic" "rikishi-create-update-detail-topic" {
+resource "aws_sns_topic" "rikishi-create-update-detail" {
     name = "rikishi-create-update-detail"
 }
 
-resource "aws_sns_topic" "rikishi-create-update-picture-topic" {
+resource "aws_sns_topic" "rikishi-create-update-picture" {
     name = "rikishi-create-update-picture"
 }
 
@@ -220,7 +235,7 @@ resource "aws_sns_topic" "rikishi-create-update-picture-topic" {
 #  Events
 ############
 
-resource "aws_cloudwatch_event_rule" "every-month-eventrule" {
+resource "aws_cloudwatch_event_rule" "every-month" {
     name = "every-month"
     description = "Trigger refresh every month"
     schedule_expression = "cron(0 0 22 * ? *)"
@@ -231,26 +246,26 @@ resource "aws_cloudwatch_event_rule" "every-month-eventrule" {
 # Rikishis
 ############
 
-resource "aws_cloudwatch_log_group" "rikishis-scrap-log-group" {
-    name = "/aws/lambda/${aws_lambda_function.rikishis-scrap-lambda.function_name}"
+resource "aws_cloudwatch_log_group" "rikishis-scrap" {
+    name = "/aws/lambda/${aws_lambda_function.rikishis-scrap.function_name}"
     retention_in_days = "60"
     tags {
         sumo = "scrap"
     }
 }
 
-resource "aws_lambda_function" "rikishis-scrap-lambda" {
+resource "aws_lambda_function" "rikishis-scrap" {
 
     function_name = "rikishis-scrap"
     description = "Scraps the list of rikishis and push to SNS"
 
-    s3_bucket = "${aws_s3_bucket.lambdas-bucket.bucket}"
+    s3_bucket = "${aws_s3_bucket.lambdas.bucket}"
     s3_key = "${aws_s3_bucket_object.lambda-rikishis-scrap-jar.key}"
 
     runtime = "java8"
     handler = "com.christoff.apps.sumolambda.ScrapRikishisLambdaHandler::handleRequest"
 
-    role = "${aws_iam_role.lambdas-scrap-role.arn}"
+    role = "${aws_iam_role.lambdas-scrap.arn}"
 
     timeout = "180"
     memory_size = "256"
@@ -260,7 +275,7 @@ resource "aws_lambda_function" "rikishis-scrap-lambda" {
     environment {
         variables {
             extractInfoOnly = "false",
-            publishdetailtopic = "${aws_sns_topic.rikishi-create-update-detail-topic.arn}"
+            publishdetailtopic = "${aws_sns_topic.rikishi-create-update-detail.arn}"
             publishpicturetopic = "not_supported_yet"
         }
     }
@@ -270,9 +285,9 @@ resource "aws_lambda_function" "rikishis-scrap-lambda" {
     }
 }
 
-resource "aws_cloudwatch_event_target" "every-month-target" {
-    rule = "${aws_cloudwatch_event_rule.every-month-eventrule.name}"
-    arn = "${aws_lambda_function.rikishis-scrap-lambda.arn}"
+resource "aws_cloudwatch_event_target" "every-month" {
+    rule = "${aws_cloudwatch_event_rule.every-month.name}"
+    arn = "${aws_lambda_function.rikishis-scrap.arn}"
 }
 
 # lambda permission ? Not IAM role ?
@@ -283,39 +298,39 @@ data "aws_caller_identity" "current" {
     # the "source_account" on the permission resource.
 }
 
-resource "aws_lambda_permission" "allow_cloudwatch-rikishis-scrap-lambda-permission" {
+resource "aws_lambda_permission" "allow-cloudwatch-rikishis-scrap-lambda" {
     statement_id   = "AllowExecutionFromCloudWatch"
     action         = "lambda:InvokeFunction"
-    function_name  = "${aws_lambda_function.rikishis-scrap-lambda.function_name}"
+    function_name  = "${aws_lambda_function.rikishis-scrap.function_name}"
     principal      = "events.amazonaws.com"
     source_account = "${data.aws_caller_identity.current.account_id}"
-    source_arn     = "${aws_cloudwatch_event_rule.every-month-eventrule.arn}"
+    source_arn     = "${aws_cloudwatch_event_rule.every-month.arn}"
 }
 
 ############
 # Rikishi
 ############
 
-resource "aws_cloudwatch_log_group" "rikishi-scrap-log-group" {
-    name = "/aws/lambda/${aws_lambda_function.rikishi-scrap-lambda.function_name}"
+resource "aws_cloudwatch_log_group" "rikishi-scrap" {
+    name = "/aws/lambda/${aws_lambda_function.rikishi-scrap.function_name}"
     retention_in_days = "60"
     tags {
         sumo = "scrap"
     }
 }
 
-resource "aws_lambda_function" "rikishi-scrap-lambda" {
+resource "aws_lambda_function" "rikishi-scrap" {
 
     function_name = "rikishi-scrap"
     description = "Triggered by SNS, scrap first rikishi of list. SNS remaining list"
 
-    s3_bucket = "${aws_s3_bucket.lambdas-bucket.bucket}"
+    s3_bucket = "${aws_s3_bucket.lambdas.bucket}"
     s3_key = "${aws_s3_bucket_object.lambda-rikishi-scrap-jar.key}"
 
     runtime = "java8"
     handler = "com.christoff.apps.sumolambda.ScrapRikishiLambdaHandler::handleRequest"
 
-    role = "${aws_iam_role.lambdas-scrap-role.arn}"
+    role = "${aws_iam_role.lambdas-scrap.arn}"
 
     timeout = "60"
     memory_size = "320"
@@ -324,8 +339,8 @@ resource "aws_lambda_function" "rikishi-scrap-lambda" {
 
     environment {
         variables {
-            publishdetailtopic = "${aws_sns_topic.rikishi-create-update-detail-topic.arn}"
-            publishpicturetopic = "${aws_sns_topic.rikishi-create-update-picture-topic.arn}"
+            publishdetailtopic = "${aws_sns_topic.rikishi-create-update-detail.arn}"
+            publishpicturetopic = "${aws_sns_topic.rikishi-create-update-picture.arn}"
         }
     }
 
@@ -334,44 +349,44 @@ resource "aws_lambda_function" "rikishi-scrap-lambda" {
     }
 }
 
-resource "aws_lambda_permission" "allow-sns-rikishi-scrap-lambda-permission" {
+resource "aws_lambda_permission" "allow-sns-rikishi-scrap-lambda" {
     statement_id  = "AllowExecutionFromSNS"
     action        = "lambda:InvokeFunction"
-    function_name = "${aws_lambda_function.rikishi-scrap-lambda.function_name}"
+    function_name = "${aws_lambda_function.rikishi-scrap.function_name}"
     principal     = "sns.amazonaws.com"
-    source_arn    = "${aws_sns_topic.rikishi-create-update-detail-topic.arn}"
+    source_arn    = "${aws_sns_topic.rikishi-create-update-detail.arn}"
 }
 
-resource "aws_sns_topic_subscription" "rikishi-scrap-lambda-target" {
-    topic_arn = "${aws_sns_topic.rikishi-create-update-detail-topic.arn}"
+resource "aws_sns_topic_subscription" "rikishi-scrap-lambda" {
+    topic_arn = "${aws_sns_topic.rikishi-create-update-detail.arn}"
     protocol  = "lambda"
-    endpoint  = "${aws_lambda_function.rikishi-scrap-lambda.arn}"
+    endpoint  = "${aws_lambda_function.rikishi-scrap.arn}"
 }
 
 ############
 # Picture
 ############
 
-resource "aws_cloudwatch_log_group" "rikishi-picture-scrap-log-group" {
-    name = "/aws/lambda/${aws_lambda_function.rikishi-picture-scrap-lambda.function_name}"
+resource "aws_cloudwatch_log_group" "rikishi-picture-scrap-" {
+    name = "/aws/lambda/${aws_lambda_function.rikishi-picture-scrap.function_name}"
     retention_in_days = "60"
     tags {
         sumo = "scrap"
     }
 }
 
-resource "aws_lambda_function" "rikishi-picture-scrap-lambda" {
+resource "aws_lambda_function" "rikishi-picture-scrap" {
 
     function_name = "rikishi-picture-scrap"
     description = "Triggered by SNS, scrap a rikishi picture to S3"
 
-    s3_bucket = "${aws_s3_bucket.lambdas-bucket.bucket}"
+    s3_bucket = "${aws_s3_bucket.lambdas.bucket}"
     s3_key = "${aws_s3_bucket_object.lambda-rikishi-picture-scrap-jar.key}"
 
     runtime = "java8"
     handler = "com.christoff.apps.sumolambda.ScrapRikishiPictureLambdaHandler::handleRequest"
 
-    role = "${aws_iam_role.lambdas-scrap-role.arn}"
+    role = "${aws_iam_role.lambdas-scrap.arn}"
 
     timeout = "90"
     memory_size = "256"
@@ -380,7 +395,7 @@ resource "aws_lambda_function" "rikishi-picture-scrap-lambda" {
 
     environment {
         variables {
-            bucket = "${aws_s3_bucket.rikishis-bucket.bucket}"
+            bucket = "${aws_s3_bucket.rikishis.bucket}"
         }
     }
 
@@ -389,44 +404,44 @@ resource "aws_lambda_function" "rikishi-picture-scrap-lambda" {
     }
 }
 
-resource "aws_lambda_permission" "allow-sns-rikishi-picture-scrap-lambda-permission" {
+resource "aws_lambda_permission" "allow-sns-rikishi-picture-scrap-lambda" {
     statement_id  = "AllowExecutionFromSNS"
     action        = "lambda:InvokeFunction"
-    function_name = "${aws_lambda_function.rikishi-picture-scrap-lambda.function_name}"
+    function_name = "${aws_lambda_function.rikishi-picture-scrap.function_name}"
     principal     = "sns.amazonaws.com"
-    source_arn    = "${aws_sns_topic.rikishi-create-update-picture-topic.arn}"
+    source_arn    = "${aws_sns_topic.rikishi-create-update-picture.arn}"
 }
 
-resource "aws_sns_topic_subscription" "rikishi-picture-scrap-lambda-target" {
-    topic_arn = "${aws_sns_topic.rikishi-create-update-picture-topic.arn}"
+resource "aws_sns_topic_subscription" "rikishi-picture-scrap-lambda" {
+    topic_arn = "${aws_sns_topic.rikishi-create-update-picture.arn}"
     protocol  = "lambda"
-    endpoint  = "${aws_lambda_function.rikishi-picture-scrap-lambda.arn}"
+    endpoint  = "${aws_lambda_function.rikishi-picture-scrap.arn}"
 }
 
 ############
 # Extract
 ############
 
-resource "aws_cloudwatch_log_group" "extract-info-get-log-group" {
-    name = "/aws/lambda/${aws_lambda_function.extract-info-get-lambda.function_name}"
+resource "aws_cloudwatch_log_group" "extract-info-get" {
+    name = "/aws/lambda/${aws_lambda_function.extract-info-get.function_name}"
     retention_in_days = "7"
     tags {
         sumo = "get"
     }
 }
 
-resource "aws_lambda_function" "extract-info-get-lambda" {
+resource "aws_lambda_function" "extract-info-get" {
 
     function_name = "extract-info-get"
     description = "Reads Extract info date from DynamoDB"
 
-    s3_bucket = "${aws_s3_bucket.lambdas-bucket.bucket}"
+    s3_bucket = "${aws_s3_bucket.lambdas.bucket}"
     s3_key = "${aws_s3_bucket_object.lambda-extract-info-get-zip.key}"
 
     runtime = "nodejs6.10"
     handler = "main.handler"
 
-    role = "${aws_iam_role.lambdas-get-role.arn}"
+    role = "${aws_iam_role.lambdas-get.arn}"
 
     timeout = "5"
     memory_size = "128"
@@ -438,11 +453,98 @@ resource "aws_lambda_function" "extract-info-get-lambda" {
     }
 }
 
+############
+# Rikishis
+############
+
+resource "aws_cloudwatch_log_group" "rikishis-get" {
+    name = "/aws/lambda/${aws_lambda_function.rikishis-get.function_name}"
+    retention_in_days = "7"
+    tags {
+        sumo = "get"
+    }
+}
+
+resource "aws_lambda_function" "rikishis-get" {
+
+    function_name = "rikishis-get"
+    description = "Reads Rikishis from DynamoDB"
+
+    s3_bucket = "${aws_s3_bucket.lambdas.bucket}"
+    s3_key = "${aws_s3_bucket_object.lambda-rikishis-get-zip.key}"
+
+    runtime = "nodejs6.10"
+    handler = "main.handler"
+
+    role = "${aws_iam_role.lambdas-get.arn}"
+
+    timeout = "60"
+    memory_size = "128"
+
+    source_code_hash = "${base64sha256(file("./rikishis-get/target/rikishis-get-0.0.1-SNAPSHOT-assembly.zip"))}"
+
+    tags {
+        sumo = "get"
+    }
+}
+
+############
+#    API
+############
+
+resource "aws_api_gateway_rest_api" "rikishis" {
+    name        = "Rikishis API"
+    description = "API to get rikishis and extract info"
+}
+
+resource "aws_api_gateway_resource" "extract-info" {
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+    parent_id   = "${aws_api_gateway_rest_api.rikishis.root_resource_id}"
+    path_part   = "extract-info"
+}
+
+resource "aws_api_gateway_method" "extract-info" {
+    rest_api_id   = "${aws_api_gateway_rest_api.rikishis.id}"
+    resource_id   = "${aws_api_gateway_resource.extract-info.id}"
+    http_method   = "GET"
+    authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "extract-info" {
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+    resource_id = "${aws_api_gateway_method.extract-info.resource_id}"
+    http_method = "${aws_api_gateway_method.extract-info.http_method}"
+    # Yes a POST ... but why ???
+    # See https://docs.aws.amazon.com/apigateway/latest/developerguide/integrating-api-with-aws-services-lambda.html
+    # "Lambda requires that the POST request be used to invoke any Lambda function"
+    integration_http_method = "POST"
+    type                    = "AWS_PROXY"
+    uri                     = "${aws_lambda_function.extract-info-get.invoke_arn}"
+}
+
+resource "aws_api_gateway_deployment" "rikishis" {
+    depends_on = [
+        "aws_api_gateway_integration.extract-info"
+    ]
+
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+    stage_name  = "test"
+}
+
+resource "aws_lambda_permission" "allow-api-extract-info-lambda" {
+    statement_id  = "AllowAPIGatewayInvoke"
+    action        = "lambda:InvokeFunction"
+    function_name = "${aws_lambda_function.extract-info-get.arn}"
+    principal     = "apigateway.amazonaws.com"
+
+    # See https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.htmls
+    source_arn = "${aws_api_gateway_deployment.rikishis.execution_arn}/GET/extract-info"
+}
+
 ##################################################################################
 # OUTPUT
 ##################################################################################
 
-/*
-output "aws_instance_public_dns" {
-    value = "${aws_instance.nginx.public_dns}"
-}*/
+output "base_url" {
+    value = "${aws_api_gateway_deployment.rikishis.invoke_url}"
+}

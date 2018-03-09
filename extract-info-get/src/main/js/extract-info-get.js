@@ -17,18 +17,6 @@ var params = {
     ExpressionAttributeValues: {":id": 1}
 };
 
-function onScan(err, data) {
-    if (err) {
-        console.error("Unable to scan the table. Error JSON:", JSON.stringify(err, null, 2));
-    } else {
-        // print all the movies
-        console.log("Scan succeeded.");
-        data.Items.forEach(function (info) {
-            console.log(info.id + ": ", info.date);
-        });
-    }
-}
-
 exports.handler = (event, context, callback) => {
     var extractinforesult;
     docClient.scan(params, function (err, data) {
@@ -39,7 +27,11 @@ exports.handler = (event, context, callback) => {
             // We have data...Go through the data returned by DynamoDB
             data.Items.forEach(function (extractinfo) {
                 // Save the value to the "global" variable
-                extractinforesult = extractinfo;
+                extractinforesult = {
+                    statusCode: 200,
+                    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+                    body: extractinfo
+                };
             });
         }
         /* Generate Response */
