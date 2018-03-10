@@ -177,9 +177,6 @@ resource "aws_lambda_permission" "allow-api-extract-info-lambda" {
     principal     = "apigateway.amazonaws.com"
 
     # See https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.htmls
-    # arn:aws:execute-api:us-west-2:424590257573:6cpobwfpog/*/GET/extract-info
-    #source_arn = "${aws_api_gateway_deployment.rikishis.execution_arn}/*/*"
-    # 424590257573
     source_arn = "arn:aws:execute-api:${data.aws_region.current-region.name}:${data.aws_caller_identity.current-caller.account_id}:${aws_api_gateway_deployment.rikishis.rest_api_id}/*/GET/extract-info"
 }
 
