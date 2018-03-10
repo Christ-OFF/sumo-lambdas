@@ -13,35 +13,34 @@ var params = {
     TableName: "EXTRACT_INFO",
     ProjectionExpression: "#id, extractdate",
     FilterExpression: "#id = :id",
-    ExpressionAttributeNames: {"#id": "id"},
-    ExpressionAttributeValues: {":id": 1}
+    ExpressionAttributeNames: { "#id": "id" },
+    ExpressionAttributeValues: {":id": 1 }
 };
 
 exports.handler = (event, context, callback) => {
-    callback(null, {
-        statusCode: '200',
-        body: JSON.stringify({ 'message': 'hello world' }),
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    })
-    /*var extractinforesult;
-    docClient.scan(params, function (err, data) {
+    // We init the result saying by default that there is no extract-info
+    var extractinforesult = {
+        statusCode:  200,
+        headers: { 'Content-Type': 'application/json; charset=utf-8' },
+        body: "{}"
+    };
+
+    docClient.scan(params, function(err, data) {
         if (err) {
             // DynamoDB error
             console.error("Unable to scan the table. Error JSON:", JSON.stringify(err, null, 2));
         } else {
             // We have data...Go through the data returned by DynamoDB
-            data.Items.forEach(function (extractinfo) {
+            data.Items.forEach(function(extractinfo) {
                 // Save the value to the "global" variable
                 extractinforesult = {
-                    statusCode: '200',
-                    headers: { 'Content-Type': 'application/json; charset=utf-8', },
-                    body: JSON.stringify(extractinfo),
+                    statusCode:  200,
+                    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+                    body: JSON.stringify(extractinfo)
                 };
             });
         }
-        /!* Generate Response *!/
-        context.done(null, extractinforesult);
-    });*/
+        /* Generate Response */
+        context.done(null,extractinforesult);
+    });
 }
