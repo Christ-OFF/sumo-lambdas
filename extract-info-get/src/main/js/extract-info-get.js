@@ -29,6 +29,12 @@ exports.handler = (event, context, callback) => {
         if (err) {
             // DynamoDB error
             console.error("Unable to scan the table. Error JSON:", JSON.stringify(err, null, 2));
+            var http500result = {
+                statusCode:  500,
+                headers: { 'Content-Type': 'application/json; charset=utf-8' },
+                body: JSON.stringify(err, null, 2)
+            };
+            context.done(null,http500result);
         } else {
             // We have data...Go through the data returned by DynamoDB
             data.Items.forEach(function(extractinfo) {

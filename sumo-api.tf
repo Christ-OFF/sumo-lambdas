@@ -140,9 +140,22 @@ resource "aws_api_gateway_resource" "extract-info" {
     path_part   = "extract-info"
 }
 
+resource "aws_api_gateway_resource" "rikishis" {
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+    parent_id   = "${aws_api_gateway_rest_api.rikishis.root_resource_id}"
+    path_part   = "rikishis"
+}
+
 resource "aws_api_gateway_method" "extract-info" {
     rest_api_id   = "${aws_api_gateway_rest_api.rikishis.id}"
     resource_id   = "${aws_api_gateway_resource.extract-info.id}"
+    http_method   = "GET"
+    authorization = "NONE"
+}
+
+resource "aws_api_gateway_method" "rikishis" {
+    rest_api_id   = "${aws_api_gateway_rest_api.rikishis.id}"
+    resource_id   = "${aws_api_gateway_resource.rikishis.id}"
     http_method   = "GET"
     authorization = "NONE"
 }
@@ -159,13 +172,16 @@ resource "aws_api_gateway_integration" "extract-info" {
     uri                     = "${aws_lambda_function.extract-info-get.invoke_arn}"
 }
 
-resource "aws_api_gateway_deployment" "rikishis" {
-    depends_on = [
-        "aws_api_gateway_integration.extract-info"
-    ]
-
+resource "aws_api_gateway_integration" "rikishis" {
     rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
-    stage_name  = "test"
+    resource_id = "${aws_api_gateway_method.rikishis.resource_id}"
+    http_method = "${aws_api_gateway_method.rikishis.http_method}"
+    # Yes a POST ... but why ???
+    # See https://docs.aws.amazon.com/apigateway/latest/developerguide/integrating-api-with-aws-services-lambda.html
+    # "Lambda requires that the POST request be used to invoke any Lambda function"
+    integration_http_method = "POST"
+    type                    = "AWS_PROXY"
+    uri                     = "${aws_lambda_function.rikishis-get.invoke_arn}"
 }
 
 data "aws_region" "current-region" {}
@@ -177,8 +193,29 @@ resource "aws_lambda_permission" "allow-api-extract-info-lambda" {
     principal     = "apigateway.amazonaws.com"
 
     # See https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.htmls
-    source_arn = "arn:aws:execute-api:${data.aws_region.current-region.name}:${data.aws_caller_identity.current-caller.account_id}:${aws_api_gateway_deployment.rikishis.rest_api_id}/*/GET/extract-info"
+    source_arn = "arn:aws:execute-api:${data.aws_region.current-region.name}:${data.aws_caller_identity.current-caller.account_id}:${aws_api_gateway_deployment.rikishis.rest_api_id}/*/GET/${aws_api_gateway_resource.extract-info.path_part}"
 }
+
+resource "aws_lambda_permission" "allow-api-rikishis-lambda" {
+    statement_id  = "AllowAPIGatewayInvoke"
+    action        = "lambda:InvokeFunction"
+    function_name = "${aws_lambda_function.rikishis-get.arn}"
+    principal     = "apigateway.amazonaws.com"
+
+    # See https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.htmls
+    source_arn = "arn:aws:execute-api:${data.aws_region.current-region.name}:${data.aws_caller_identity.current-caller.account_id}:${aws_api_gateway_deployment.rikishis.rest_api_id}/*/GET/${aws_api_gateway_resource.rikishis.path_part}"
+}
+
+resource "aws_api_gateway_deployment" "rikishis" {
+    depends_on = [
+        "aws_api_gateway_integration.extract-info",
+        "aws_api_gateway_integration.rikishis"
+    ]
+
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+    stage_name  = "test"
+}
+
 
 ##################################################################################
 # OUTPUT
