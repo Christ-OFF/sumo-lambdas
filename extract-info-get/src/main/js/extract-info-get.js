@@ -18,7 +18,14 @@ var params = {
 };
 
 exports.handler = (event, context, callback) => {
-    var extractinforesult;
+    callback(null, {
+        statusCode: '200',
+        body: JSON.stringify({ 'message': 'hello world' }),
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    /*var extractinforesult;
     docClient.scan(params, function (err, data) {
         if (err) {
             // DynamoDB error
@@ -28,13 +35,13 @@ exports.handler = (event, context, callback) => {
             data.Items.forEach(function (extractinfo) {
                 // Save the value to the "global" variable
                 extractinforesult = {
-                    statusCode: 200,
-                    headers: { 'Content-Type': 'application/json; charset=utf-8' },
-                    body: extractinfo
+                    statusCode: '200',
+                    headers: { 'Content-Type': 'application/json; charset=utf-8', },
+                    body: JSON.stringify(extractinfo),
                 };
             });
         }
-        /* Generate Response */
+        /!* Generate Response *!/
         context.done(null, extractinforesult);
-    });
+    });*/
 }

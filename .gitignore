@@ -3,3 +3,4 @@
 /.idea/
 /.terraform/
 /terraform.tfstate.d/
+/output.txt
