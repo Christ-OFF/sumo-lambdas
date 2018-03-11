@@ -2,6 +2,14 @@
 # API
 ##################################################################################
 
+variable "throttling_rate_limit" {
+    default = 10
+}
+
+variable "throttling_burst_limit" {
+    default = 5
+}
+
 ############
 #    S3
 ############
@@ -44,15 +52,33 @@ resource "aws_iam_role" "lambdas-api" {
 }
 
 # We add to this role the policy to allow logging
-resource "aws_iam_role_policy_attachment" "lambdas-api-role-cloudwatchfullaccess" {
+resource "aws_iam_role_policy_attachment" "lambdas-api-CloudWatchLogsFullAccess" {
     role = "${aws_iam_role.lambdas-api.name}"
     policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
 }
 
 # We add to this role the policy to read from DynamoDB
-resource "aws_iam_role_policy_attachment" "lambdas-api-role-dynamo-ro-attach" {
+resource "aws_iam_role_policy_attachment" "lambdas-api-AmazonDynamoDBReadOnlyAccess" {
     role = "${aws_iam_role.lambdas-api.name}"
     policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBReadOnlyAccess"
+}
+
+resource "aws_iam_role" "api" {
+    name = "api"
+    description = "Role for API to read S3 and Log"
+    assume_role_policy = "${file("policies/api-role.json")}"
+}
+
+# We add to this role the policy to allow logging
+resource "aws_iam_role_policy_attachment" "api-CloudWatchLogsFullAccess" {
+    role = "${aws_iam_role.api.name}"
+    policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
+}
+
+# We add to this role the policy to read from DynamoDB
+resource "aws_iam_role_policy_attachment" "api-AmazonS3ReadOnlyAccess" {
+    role = "${aws_iam_role.api.name}"
+    policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
 }
 
 ############
@@ -130,34 +156,39 @@ resource "aws_lambda_function" "rikishis-get" {
 ############
 
 resource "aws_api_gateway_rest_api" "rikishis" {
-    name        = "Rikishis API"
+    name = "Rikishis API"
     description = "API to get rikishis and extract info"
+    binary_media_types = [
+        "image/jpeg"]
 }
+
+data "aws_region" "current-region" {}
+
+##############
+# ExtractInfo
+##############
 
 resource "aws_api_gateway_resource" "extract-info" {
     rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
-    parent_id   = "${aws_api_gateway_rest_api.rikishis.root_resource_id}"
-    path_part   = "extract-info"
-}
-
-resource "aws_api_gateway_resource" "rikishis" {
-    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
-    parent_id   = "${aws_api_gateway_rest_api.rikishis.root_resource_id}"
-    path_part   = "rikishis"
+    parent_id = "${aws_api_gateway_rest_api.rikishis.root_resource_id}"
+    path_part = "extract-info"
 }
 
 resource "aws_api_gateway_method" "extract-info" {
-    rest_api_id   = "${aws_api_gateway_rest_api.rikishis.id}"
-    resource_id   = "${aws_api_gateway_resource.extract-info.id}"
-    http_method   = "GET"
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+    resource_id = "${aws_api_gateway_resource.extract-info.id}"
+    http_method = "GET"
     authorization = "NONE"
 }
 
-resource "aws_api_gateway_method" "rikishis" {
-    rest_api_id   = "${aws_api_gateway_rest_api.rikishis.id}"
-    resource_id   = "${aws_api_gateway_resource.rikishis.id}"
-    http_method   = "GET"
-    authorization = "NONE"
+resource "aws_api_gateway_method_settings" "extract-info" {
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+    stage_name = "${aws_api_gateway_stage.test.stage_name}"
+    method_path = "${aws_api_gateway_resource.extract-info.path_part}/${aws_api_gateway_method.extract-info.http_method}"
+    settings {
+        throttling_rate_limit = "${var.throttling_rate_limit}"
+        throttling_burst_limit = "${var.throttling_burst_limit}"
+    }
 }
 
 resource "aws_api_gateway_integration" "extract-info" {
@@ -168,8 +199,45 @@ resource "aws_api_gateway_integration" "extract-info" {
     # See https://docs.aws.amazon.com/apigateway/latest/developerguide/integrating-api-with-aws-services-lambda.html
     # "Lambda requires that the POST request be used to invoke any Lambda function"
     integration_http_method = "POST"
-    type                    = "AWS_PROXY"
-    uri                     = "${aws_lambda_function.extract-info-get.invoke_arn}"
+    type = "AWS_PROXY"
+    uri = "${aws_lambda_function.extract-info-get.invoke_arn}"
+}
+
+resource "aws_lambda_permission" "allow-api-extract-info-lambda" {
+    statement_id = "AllowAPIGatewayInvoke"
+    action = "lambda:InvokeFunction"
+    function_name = "${aws_lambda_function.extract-info-get.arn}"
+    principal = "apigateway.amazonaws.com"
+
+    # See https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.htmls
+    source_arn = "arn:aws:execute-api:${data.aws_region.current-region.name}:${data.aws_caller_identity.current-caller.account_id}:${aws_api_gateway_deployment.rikishis.rest_api_id}/*/GET/${aws_api_gateway_resource.extract-info.path_part}"
+}
+
+##############
+# Rikishis
+##############
+
+resource "aws_api_gateway_resource" "rikishis" {
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+    parent_id = "${aws_api_gateway_rest_api.rikishis.root_resource_id}"
+    path_part = "rikishis"
+}
+
+resource "aws_api_gateway_method" "rikishis" {
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+    resource_id = "${aws_api_gateway_resource.rikishis.id}"
+    http_method = "GET"
+    authorization = "NONE"
+}
+
+resource "aws_api_gateway_method_settings" "rikishis" {
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+    stage_name = "${aws_api_gateway_stage.test.stage_name}"
+    method_path = "${aws_api_gateway_resource.rikishis.path_part}/${aws_api_gateway_method.rikishis.http_method}"
+    settings {
+        throttling_rate_limit = "${var.throttling_rate_limit}"
+        throttling_burst_limit = "${var.throttling_burst_limit}"
+    }
 }
 
 resource "aws_api_gateway_integration" "rikishis" {
@@ -180,42 +248,155 @@ resource "aws_api_gateway_integration" "rikishis" {
     # See https://docs.aws.amazon.com/apigateway/latest/developerguide/integrating-api-with-aws-services-lambda.html
     # "Lambda requires that the POST request be used to invoke any Lambda function"
     integration_http_method = "POST"
-    type                    = "AWS_PROXY"
-    uri                     = "${aws_lambda_function.rikishis-get.invoke_arn}"
-}
-
-data "aws_region" "current-region" {}
-
-resource "aws_lambda_permission" "allow-api-extract-info-lambda" {
-    statement_id  = "AllowAPIGatewayInvoke"
-    action        = "lambda:InvokeFunction"
-    function_name = "${aws_lambda_function.extract-info-get.arn}"
-    principal     = "apigateway.amazonaws.com"
-
-    # See https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.htmls
-    source_arn = "arn:aws:execute-api:${data.aws_region.current-region.name}:${data.aws_caller_identity.current-caller.account_id}:${aws_api_gateway_deployment.rikishis.rest_api_id}/*/GET/${aws_api_gateway_resource.extract-info.path_part}"
+    type = "AWS_PROXY"
+    uri = "${aws_lambda_function.rikishis-get.invoke_arn}"
 }
 
 resource "aws_lambda_permission" "allow-api-rikishis-lambda" {
-    statement_id  = "AllowAPIGatewayInvoke"
-    action        = "lambda:InvokeFunction"
+    statement_id = "AllowAPIGatewayInvoke"
+    action = "lambda:InvokeFunction"
     function_name = "${aws_lambda_function.rikishis-get.arn}"
-    principal     = "apigateway.amazonaws.com"
+    principal = "apigateway.amazonaws.com"
 
     # See https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.htmls
     source_arn = "arn:aws:execute-api:${data.aws_region.current-region.name}:${data.aws_caller_identity.current-caller.account_id}:${aws_api_gateway_deployment.rikishis.rest_api_id}/*/GET/${aws_api_gateway_resource.rikishis.path_part}"
 }
 
-resource "aws_api_gateway_deployment" "rikishis" {
-    depends_on = [
-        "aws_api_gateway_integration.extract-info",
-        "aws_api_gateway_integration.rikishis"
-    ]
+##############
+# Pictures
+##############
 
+resource "aws_api_gateway_resource" "pictures" {
     rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
-    stage_name  = "test"
+    parent_id = "${aws_api_gateway_rest_api.rikishis.root_resource_id}"
+    path_part = "pic"
 }
 
+resource "aws_api_gateway_resource" "picture" {
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+    parent_id = "${aws_api_gateway_resource.pictures.id}"
+    path_part = "{id}"
+}
+
+resource "aws_api_gateway_method" "picture" {
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+    resource_id = "${aws_api_gateway_resource.picture.id}"
+    http_method = "GET"
+    authorization = "NONE"
+    # See https://docs.aws.amazon.com/cli/latest/reference/apigateway/put-method.html
+    request_parameters = {
+        "method.request.path.id" = true
+    }
+}
+
+resource "aws_api_gateway_method_settings" "picture" {
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+    stage_name = "${aws_api_gateway_stage.test.stage_name}"
+    method_path = "${aws_api_gateway_resource.picture.path_part}/${aws_api_gateway_method.picture.http_method}"
+    settings {
+        throttling_rate_limit = 10
+        throttling_burst_limit = 5
+    }
+}
+
+resource "aws_api_gateway_integration" "picture" {
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+    resource_id = "${aws_api_gateway_method.picture.resource_id}"
+    http_method = "${aws_api_gateway_method.picture.http_method}"
+    # We are not a lambda ...
+    integration_http_method = "GET"
+    type = "AWS"
+    credentials = "${aws_iam_role.api.arn}"
+    # uri is arn:aws:apigateway:{region}:{subdomain.service|service}:{path|action}/{service_api}
+    # arn:aws:apigateway:us-west-2:s3:path/rikishis/{file}.jpg
+    uri = "arn:aws:apigateway:${data.aws_region.current-region.name}:s3:path/${aws_s3_bucket.rikishis.bucket}/{file}.jpg"
+    request_parameters {
+        "integration.request.path.file" = "method.request.path.id"
+    }
+    passthrough_behavior = "WHEN_NO_MATCH"
+    content_handling = "CONVERT_TO_BINARY"
+}
+
+resource "aws_api_gateway_method_response" "picture-200" {
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+    resource_id = "${aws_api_gateway_resource.picture.id}"
+    http_method = "${aws_api_gateway_method.picture.http_method}"
+    status_code = "200"
+    response_parameters = {
+        "method.response.header.Content-Type" = true,
+        "method.response.header.Content-Length" = true
+    }
+}
+
+resource "aws_api_gateway_integration_response" "picture-200" {
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+    resource_id = "${aws_api_gateway_resource.picture.id}"
+    http_method = "${aws_api_gateway_method.picture.http_method}"
+    status_code = "${aws_api_gateway_method_response.picture-200.status_code}"
+    # could add selection_pattern = "200"
+    response_parameters {
+        # Params here must be enabled first in aws_api_gateway_method_response
+        "method.response.header.Content-Type" = "integration.response.header.Content-Type",
+        "method.response.header.Content-Length" = "integration.response.header.Content-Length"
+    }
+}
+
+resource "aws_api_gateway_method_response" "picture-404" {
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+    resource_id = "${aws_api_gateway_resource.picture.id}"
+    http_method = "${aws_api_gateway_method.picture.http_method}"
+    status_code = "404"
+}
+
+resource "aws_api_gateway_integration_response" "picture-404" {
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+    resource_id = "${aws_api_gateway_resource.picture.id}"
+    http_method = "${aws_api_gateway_method.picture.http_method}"
+    status_code = "${aws_api_gateway_method_response.picture-404.status_code}"
+    selection_pattern = "404"
+}
+
+##################################################################################
+# DEPLOY API
+##################################################################################
+
+resource "aws_api_gateway_stage" "test" {
+    stage_name = "test"
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+    deployment_id = "${aws_api_gateway_deployment.rikishis.id}"
+    description = "For internal tests with low rate limit)"
+}
+
+resource "aws_api_gateway_usage_plan" "usage-plan" {
+    name = "usage-plan"
+    description = "Usage Plan to limit queries to avoid costs"
+    product_code = "sumo"
+
+    api_stages {
+        api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+        stage = "${aws_api_gateway_stage.test.stage_name}"
+    }
+
+    throttle_settings {
+        burst_limit = 1
+        rate_limit = 5
+    }
+}
+
+resource "aws_api_gateway_deployment" "rikishis" {
+    # Do not forget to add depends to deploy
+    depends_on = [
+        "aws_api_gateway_integration.extract-info",
+        "aws_api_gateway_integration.rikishis",
+        "aws_api_gateway_integration.picture",
+        "aws_api_gateway_method_response.picture-200",
+        "aws_api_gateway_method_response.picture-404",
+        "aws_api_gateway_integration_response.picture-200",
+        "aws_api_gateway_integration_response.picture-404"
+    ]
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+    stage_name = "test"
+}
 
 ##################################################################################
 # OUTPUT
