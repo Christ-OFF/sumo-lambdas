@@ -5,11 +5,11 @@
 resource "aws_s3_bucket_object" "lambda-rikishis-scrap-jar" {
     key = "lambda-rikishis-scrap"
     bucket = "${aws_s3_bucket.lambdas.id}"
-    source = "./lambda-rikishis-scrap/target/lambda-rikishis-scrap-0.0.1-SNAPSHOT.jar"
+    source = "../lambda-rikishis-scrap/target/lambda-rikishis-scrap-0.0.1-SNAPSHOT.jar"
     content_type = "application/java-archive"
     acl = "private"
     # etag is here to detect changes
-    etag = "${md5(file("./lambda-rikishis-scrap/target/lambda-rikishis-scrap-0.0.1-SNAPSHOT.jar"))}"
+    etag = "${md5(file("../lambda-rikishis-scrap/target/lambda-rikishis-scrap-0.0.1-SNAPSHOT.jar"))}"
     tags {
         sumo = "scrap"
     }
@@ -18,11 +18,11 @@ resource "aws_s3_bucket_object" "lambda-rikishis-scrap-jar" {
 resource "aws_s3_bucket_object" "lambda-rikishi-scrap-jar" {
     key = "lambda-rikishi-scrap"
     bucket = "${aws_s3_bucket.lambdas.id}"
-    source = "./lambda-rikishi-scrap/target/lambda-rikishi-scrap-0.0.1-SNAPSHOT.jar"
+    source = "../lambda-rikishi-scrap/target/lambda-rikishi-scrap-0.0.1-SNAPSHOT.jar"
     content_type = "application/java-archive"
     acl = "private"
     # etag is here to detect changes
-    etag = "${md5(file("./lambda-rikishi-scrap/target/lambda-rikishi-scrap-0.0.1-SNAPSHOT.jar"))}"
+    etag = "${md5(file("../lambda-rikishi-scrap/target/lambda-rikishi-scrap-0.0.1-SNAPSHOT.jar"))}"
     tags {
         sumo = "scrap"
     }
@@ -31,11 +31,11 @@ resource "aws_s3_bucket_object" "lambda-rikishi-scrap-jar" {
 resource "aws_s3_bucket_object" "lambda-rikishi-picture-scrap-jar" {
     key = "lambda-rikishi-picture-scrap"
     bucket = "${aws_s3_bucket.lambdas.id}"
-    source = "./lambda-rikishi-picture-scrap/target/lambda-rikishi-picture-scrap-0.0.1-SNAPSHOT.jar"
+    source = "../lambda-rikishi-picture-scrap/target/lambda-rikishi-picture-scrap-0.0.1-SNAPSHOT.jar"
     content_type = "application/java-archive"
     acl = "private"
     # etag is here to detect changes
-    etag = "${md5(file("./lambda-rikishi-picture-scrap/target/lambda-rikishi-picture-scrap-0.0.1-SNAPSHOT.jar"))}"
+    etag = "${md5(file("../lambda-rikishi-picture-scrap/target/lambda-rikishi-picture-scrap-0.0.1-SNAPSHOT.jar"))}"
     tags {
         sumo = "scrap"
     }
@@ -49,7 +49,7 @@ resource "aws_s3_bucket_object" "lambda-rikishi-picture-scrap-jar" {
 resource "aws_iam_role" "lambdas-scrap" {
     name = "lambdas-scrap"
     description = "Role for lambdas scrapping content"
-    assume_role_policy = "${file("policies/lambda-scrap-role.json")}"
+    assume_role_policy = "${file("./policies/lambda-scrap-role.json")}"
 }
 
 resource "aws_iam_role_policy_attachment" "lambdas-scrap-role-s3fullaccess" {
@@ -124,7 +124,7 @@ resource "aws_lambda_function" "rikishis-scrap" {
     timeout = "180"
     memory_size = "256"
 
-    source_code_hash = "${base64sha256(file("./lambda-rikishis-scrap/target/lambda-rikishis-scrap-0.0.1-SNAPSHOT.jar"))}"
+    source_code_hash = "${base64sha256(file("../lambda-rikishis-scrap/target/lambda-rikishis-scrap-0.0.1-SNAPSHOT.jar"))}"
 
     environment {
         variables {
@@ -189,7 +189,7 @@ resource "aws_lambda_function" "rikishi-scrap" {
     timeout = "60"
     memory_size = "320"
 
-    source_code_hash = "${base64sha256(file("./lambda-rikishi-scrap/target/lambda-rikishi-scrap-0.0.1-SNAPSHOT.jar"))}"
+    source_code_hash = "${base64sha256(file("../lambda-rikishi-scrap/target/lambda-rikishi-scrap-0.0.1-SNAPSHOT.jar"))}"
 
     environment {
         variables {
@@ -245,7 +245,7 @@ resource "aws_lambda_function" "rikishi-picture-scrap" {
     timeout = "90"
     memory_size = "256"
 
-    source_code_hash = "${base64sha256(file("./lambda-rikishi-picture-scrap/target/lambda-rikishi-picture-scrap-0.0.1-SNAPSHOT.jar"))}"
+    source_code_hash = "${base64sha256(file("../lambda-rikishi-picture-scrap/target/lambda-rikishi-picture-scrap-0.0.1-SNAPSHOT.jar"))}"
 
     environment {
         variables {

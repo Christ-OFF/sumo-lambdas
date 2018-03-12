@@ -8,10 +8,22 @@ resource "aws_api_gateway_resource" "pictures" {
     path_part = "pic"
 }
 
+module "cors-pictures" {
+    source = "github.com/carrot/terraform-api-gateway-cors-module"
+    resource_id = "${aws_api_gateway_resource.pictures.id}"
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+}
+
 resource "aws_api_gateway_resource" "picture" {
     rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
     parent_id = "${aws_api_gateway_resource.pictures.id}"
     path_part = "{id}"
+}
+
+module "cors-picture" {
+    source = "github.com/carrot/terraform-api-gateway-cors-module"
+    resource_id = "${aws_api_gateway_resource.picture.id}"
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
 }
 
 resource "aws_api_gateway_method" "picture" {

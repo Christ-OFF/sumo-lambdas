@@ -17,11 +17,11 @@ variable "throttling_burst_limit" {
 resource "aws_s3_bucket_object" "lambda-extract-info-get-zip" {
     key = "lambda-extract-info-get"
     bucket = "${aws_s3_bucket.lambdas.id}"
-    source = "./extract-info-get/target/extract-info-get-0.0.1-SNAPSHOT-assembly.zip"
+    source = "../extract-info-get/target/extract-info-get-0.0.1-SNAPSHOT-assembly.zip"
     content_type = "application/zip"
     acl = "private"
     # etag is here to detect changes
-    etag = "${md5(file("./extract-info-get/target/extract-info-get-0.0.1-SNAPSHOT-assembly.zip"))}"
+    etag = "${md5(file("../extract-info-get/target/extract-info-get-0.0.1-SNAPSHOT-assembly.zip"))}"
     tags {
         sumo = "get"
     }
@@ -30,11 +30,11 @@ resource "aws_s3_bucket_object" "lambda-extract-info-get-zip" {
 resource "aws_s3_bucket_object" "lambda-rikishis-get-zip" {
     key = "rikishis-get"
     bucket = "${aws_s3_bucket.lambdas.id}"
-    source = "./rikishis-get/target/rikishis-get-0.0.1-SNAPSHOT-assembly.zip"
+    source = "../rikishis-get/target/rikishis-get-0.0.1-SNAPSHOT-assembly.zip"
     content_type = "application/zip"
     acl = "private"
     # etag is here to detect changes
-    etag = "${md5(file("./rikishis-get/target/rikishis-get-0.0.1-SNAPSHOT-assembly.zip"))}"
+    etag = "${md5(file("../rikishis-get/target/rikishis-get-0.0.1-SNAPSHOT-assembly.zip"))}"
     tags {
         sumo = "get"
     }
@@ -48,7 +48,7 @@ resource "aws_s3_bucket_object" "lambda-rikishis-get-zip" {
 resource "aws_iam_role" "lambdas-api" {
     name = "lambdas-api"
     description = "Role for lambdas used by API Gateway (ReadOnly by the way)"
-    assume_role_policy = "${file("policies/lambda-api-role.json")}"
+    assume_role_policy = "${file("./policies/lambda-api-role.json")}"
 }
 
 # We add to this role the policy to allow logging
@@ -66,7 +66,7 @@ resource "aws_iam_role_policy_attachment" "lambdas-api-AmazonDynamoDBReadOnlyAcc
 resource "aws_iam_role" "api" {
     name = "api"
     description = "Role for API to read S3 and Log"
-    assume_role_policy = "${file("policies/api-role.json")}"
+    assume_role_policy = "${file("./policies/api-role.json")}"
 }
 
 # We add to this role the policy to allow logging
@@ -109,7 +109,7 @@ resource "aws_lambda_function" "extract-info-get" {
     timeout = "5"
     memory_size = "128"
 
-    source_code_hash = "${base64sha256(file("./extract-info-get/target/extract-info-get-0.0.1-SNAPSHOT-assembly.zip"))}"
+    source_code_hash = "${base64sha256(file("../extract-info-get/target/extract-info-get-0.0.1-SNAPSHOT-assembly.zip"))}"
 
     tags {
         sumo = "get"
@@ -144,7 +144,7 @@ resource "aws_lambda_function" "rikishis-get" {
     timeout = "60"
     memory_size = "128"
 
-    source_code_hash = "${base64sha256(file("./rikishis-get/target/rikishis-get-0.0.1-SNAPSHOT-assembly.zip"))}"
+    source_code_hash = "${base64sha256(file("../rikishis-get/target/rikishis-get-0.0.1-SNAPSHOT-assembly.zip"))}"
 
     tags {
         sumo = "get"
@@ -174,6 +174,12 @@ resource "aws_api_gateway_resource" "extract-info" {
     path_part = "extract-info"
 }
 
+module "cors-extract-info" {
+    source = "github.com/carrot/terraform-api-gateway-cors-module"
+    resource_id = "${aws_api_gateway_resource.extract-info.id}"
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
+}
+
 resource "aws_api_gateway_method" "extract-info" {
     rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
     resource_id = "${aws_api_gateway_resource.extract-info.id}"
@@ -201,6 +207,7 @@ resource "aws_api_gateway_integration" "extract-info" {
     integration_http_method = "POST"
     type = "AWS_PROXY"
     uri = "${aws_lambda_function.extract-info-get.invoke_arn}"
+
 }
 
 resource "aws_lambda_permission" "allow-api-extract-info-lambda" {
@@ -221,6 +228,12 @@ resource "aws_api_gateway_resource" "rikishis" {
     rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
     parent_id = "${aws_api_gateway_rest_api.rikishis.root_resource_id}"
     path_part = "rikishis"
+}
+
+module "cors-rikishis" {
+    source = "github.com/carrot/terraform-api-gateway-cors-module"
+    resource_id = "${aws_api_gateway_resource.rikishis.id}"
+    rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
 }
 
 resource "aws_api_gateway_method" "rikishis" {
