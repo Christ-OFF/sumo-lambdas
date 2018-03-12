@@ -1,6 +1,5 @@
 *.iml
 /*/target/
 /.idea/
-/.terraform/
-/terraform.tfstate.d/
-/output.txt
+/terraform/terraform.tfstate.d/
+/terraform/.terraform/
