@@ -21,7 +21,10 @@ function onScan(err, data, context) {
         console.error("Unable to scan the table. Error JSON:", JSON.stringify(err, null, 2));
         var http500Result = {
             statusCode:  500,
-            headers: { 'Content-Type': 'application/json; charset=utf-8' },
+            headers: {
+                'Content-Type': 'application/json; charset=utf-8',
+                'Access-Control-Allow-Origin': '*'
+            },
             body: JSON.stringify(err, null, 2)
         };
         resultContext.done(null, http500Result);
@@ -39,7 +42,10 @@ function onScan(err, data, context) {
         /* Generate Response */
         var httpResult =  {
             statusCode:  200,
-            headers: { 'Content-Type': 'application/json; charset=utf-8' },
+            headers: {
+                'Content-Type': 'application/json; charset=utf-8',
+                'Access-Control-Allow-Origin': '*'
+            },
             body: JSON.stringify(rikishisArray)
         };
         resultContext.done(null, httpResult);

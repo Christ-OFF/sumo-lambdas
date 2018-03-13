@@ -185,6 +185,9 @@ resource "aws_api_gateway_method" "extract-info" {
     resource_id = "${aws_api_gateway_resource.extract-info.id}"
     http_method = "GET"
     authorization = "NONE"
+    request_parameters {
+        "method.request.header.Access-Control-Allow-Origin" = true
+    }
 }
 
 resource "aws_api_gateway_method_settings" "extract-info" {
@@ -241,6 +244,9 @@ resource "aws_api_gateway_method" "rikishis" {
     resource_id = "${aws_api_gateway_resource.rikishis.id}"
     http_method = "GET"
     authorization = "NONE"
+    request_parameters {
+        "method.request.header.Access-Control-Allow-Origin" = true
+    }
 }
 
 resource "aws_api_gateway_method_settings" "rikishis" {
@@ -284,22 +290,6 @@ resource "aws_api_gateway_stage" "test" {
     rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
     deployment_id = "${aws_api_gateway_deployment.rikishis.id}"
     description = "For internal tests with low rate limit)"
-}
-
-resource "aws_api_gateway_usage_plan" "usage-plan" {
-    name = "usage-plan"
-    description = "Usage Plan to limit queries to avoid costs"
-    product_code = "sumo"
-
-    api_stages {
-        api_id = "${aws_api_gateway_rest_api.rikishis.id}"
-        stage = "${aws_api_gateway_stage.test.stage_name}"
-    }
-
-    throttle_settings {
-        burst_limit = 1
-        rate_limit = 5
-    }
 }
 
 resource "aws_api_gateway_deployment" "rikishis" {

@@ -34,6 +34,7 @@ resource "aws_api_gateway_method" "picture" {
     # See https://docs.aws.amazon.com/cli/latest/reference/apigateway/put-method.html
     request_parameters = {
         "method.request.path.id" = true
+        "method.request.header.Access-Control-Allow-Origin" = true
     }
 }
 
