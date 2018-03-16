@@ -11,7 +11,6 @@ public class RikishisPicturesScrapParameters {
     public static final Float DEFAULT_QUALITY = 0.3F;
 
     public static final String DEFAULT_PICS_PATH = "pics/";
-    public static final String DEFAULT_BUCKET = "rikishis";
     private static final Logger LOGGER = Logger.getLogger(RikishisPicturesScrapParameters.class);
     /**
      * Should be http://sumodb.sumogames.de/ in production
@@ -67,7 +66,6 @@ public class RikishisPicturesScrapParameters {
             builded = new RikishisPicturesScrapParameters();
             builded.baseurl = RikishisScrapParameters.DEFAULT_BASE_URL;
             builded.imageurl = DEFAULT_PICS_PATH;
-            builded.bucket = DEFAULT_BUCKET;
             builded.quality = DEFAULT_QUALITY;
         }
 

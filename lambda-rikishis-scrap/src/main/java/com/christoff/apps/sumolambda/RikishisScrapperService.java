@@ -9,6 +9,7 @@ import com.christoff.apps.scrappers.Scrapper;
 import com.christoff.apps.sumo.lambda.ScrapperService;
 import com.christoff.apps.sumo.lambda.domain.ExtractInfo;
 import com.christoff.apps.sumo.lambda.domain.Rikishi;
+import com.christoff.apps.sumo.lambda.sns.RikishisListMethods;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,14 +59,13 @@ public class RikishisScrapperService extends ScrapperService {
             LOGGER.info("Going to scrap Rikishi's list using " + parameters.toString());
             // Scrap the list of rikishis
             List<Integer> rikishisIds = scrapper.select();
-            // Emmit messages
+            // Emmit message with list of all rikishis ids
             if (rikishisIds != null && !rikishisIds.isEmpty()) {
                 LOGGER.info("Scraped list of " + rikishisIds.size() + " Rikishis ");
-                rikishisIds.forEach(id -> publishEvent(parameters, String.valueOf(id)));
-                // Last step : say that we have updated rikishis
-                // Yes we say that we have updated even we have only sent messages after scrapping the list
-                // We could say in the message : your are the lastest one, update also extract information
+                RikishisListMethods.publishRikishisListEvent(sns, parameters.getPublishDetailTopic(), rikishisIds);
                 updateExtractInfo();
+            } else {
+                LOGGER.warn("No rikishis in scrapped list from " + parameters.toString());
             }
         } else {
             updateExtractInfo();
@@ -81,10 +81,14 @@ public class RikishisScrapperService extends ScrapperService {
         LOGGER.info("Erasing Rikishis one by one...");
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
         PaginatedScanList<Rikishi> result = mapper.scan(Rikishi.class, scanExpression);
-        for (Rikishi data : result) {
-            mapper.delete(data);
+        if (result != null) {
+            for (Rikishi data : result) {
+                mapper.delete(data);
+            }
+            LOGGER.info("Erasing Rikishis one by one...done");
+        } else {
+            LOGGER.warn("No rikishis to erase");
         }
-        LOGGER.info("Erasing Rikishis one by one...done");
     }
 
     /**

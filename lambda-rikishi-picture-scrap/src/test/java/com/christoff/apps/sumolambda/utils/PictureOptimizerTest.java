@@ -6,19 +6,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(Parameterized.class)
-class PictureOptimizerTest {
+public class PictureOptimizerTest {
 
     @NotNull
-    private static Stream<Arguments> twoQualitiesProvider() {
+    static Stream<Arguments> twoQualitiesProvider() {
         return Stream.of(
             Arguments.of(0.1F, 0.2F),
             Arguments.of(0.2F, 0.3F),
@@ -30,7 +27,7 @@ class PictureOptimizerTest {
         );
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}] image between {0} and {1} quality")
     @MethodSource("twoQualitiesProvider")
     void should_reduce_size_according_to_quality(Float lowerQuality, Float higherQuality) throws IOException {
         byte[] picture = RikishiPictureScrapperService.getDefaultRikishiPicture();

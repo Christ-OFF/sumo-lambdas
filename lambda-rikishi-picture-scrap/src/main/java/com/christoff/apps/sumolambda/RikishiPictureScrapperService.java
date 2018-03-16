@@ -1,6 +1,7 @@
 package com.christoff.apps.sumolambda;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.christoff.apps.scrappers.RikishisPicturesScrapParameters;
 import com.christoff.apps.scrappers.Scrapper;
@@ -105,7 +106,9 @@ public class RikishiPictureScrapperService {
                 metadata);
             LOGGER.info("Saved " + rikishiId + ".jpg to " + params.getBucket() + "with size " + reduced.length);
         } catch (IOException ioe) {
-            LOGGER.error("Unable to read bytes from image. Abort S3Store of " + rikishiId);
+            LOGGER.error("Unable to read bytes from image. Abort S3Store of " + rikishiId, ioe);
+        } catch (AmazonS3Exception as3) {
+            LOGGER.error("Unable to save picture of " + rikishiId + " to " + params.getBucket(), as3);
         }
 
     }

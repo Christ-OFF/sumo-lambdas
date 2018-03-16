@@ -39,7 +39,8 @@ public class ScrapRikishisLambdaHandler extends LambdaScrapBase {
      */
     @Bean
     public RikishisScrapParameters params() {
-        return new RikishisScrapParameters.Builder(System.getenv("publishtopic"))
+        return new RikishisScrapParameters.Builder(
+            System.getenv(PUBLISH_DETAIL_TOPIC),System.getenv(PUBLISH_PICTURE_TOPIC))
             .withBaseUrl(System.getenv("baseurl"))
             .withListUrl(System.getenv("listurl"))
             .withRikishiUrl(System.getenv("rikishiurl"))

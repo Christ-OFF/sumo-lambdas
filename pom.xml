@@ -19,14 +19,17 @@
         <module>lambda-rikishis-scrap</module>
         <module>lambda-rikishi-scrap</module>
         <module>lambda-rikishi-picture-scrap</module>
+        <module>extract-info-get</module>
+        <module>rikishis-get</module>
     </modules>
 
     <properties>
         <spring.boot.version>1.5.7.RELEASE</spring.boot.version>
         <spring.version>4.3.11.RELEASE</spring.version>
-        <junit.jupiter.version>5.0.0</junit.jupiter.version>
+        <junit.jupiter.version>5.1.0</junit.jupiter.version>
         <aws.sdk.version>1.11.189</aws.sdk.version>
         <aws.lambda-java-events.version>1.3.0</aws.lambda-java-events.version>
+        <jackson.version>2.9.4</jackson.version>
     </properties>
 
     <dependencyManagement>
@@ -81,6 +84,11 @@
                 <artifactId>spring-context</artifactId>
                 <version>${spring.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-core</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
 
             <!-- Other dependencies -->
             <!-- AWS uses log4j 1.2 See http://docs.aws.amazon.com/lambda/latest/dg/java-logging.html -->
@@ -90,16 +98,30 @@
                 <version>1.2.17</version>
             </dependency>
             <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>19.0</version>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>1.10.2</version>
             </dependency>
             <dependency>
                 <groupId>com.intellij</groupId>
                 <artifactId>annotations</artifactId>
                 <version>12.0</version>
             </dependency>
-
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>19.0</version>
+            </dependency>
             <!-- Test dependencies -->
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
@@ -120,6 +142,11 @@
                 <groupId>ru.lanwen.wiremock</groupId>
                 <artifactId>wiremock-junit5</artifactId>
                 <version>1.1.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>1.10.19</version>
             </dependency>
         </dependencies>
 
