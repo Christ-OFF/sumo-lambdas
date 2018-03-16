@@ -306,11 +306,3 @@ resource "aws_api_gateway_deployment" "rikishis" {
     rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
     stage_name = "test"
 }
-
-##################################################################################
-# OUTPUT
-##################################################################################
-
-output "base_url" {
-    value = "${aws_api_gateway_deployment.rikishis.invoke_url}"
-}
