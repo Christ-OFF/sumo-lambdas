@@ -296,12 +296,7 @@ resource "aws_api_gateway_deployment" "rikishis" {
     # Do not forget to add depends to deploy
     depends_on = [
         "aws_api_gateway_integration.extract-info",
-        "aws_api_gateway_integration.rikishis",
-        "aws_api_gateway_integration.picture",
-        "aws_api_gateway_method_response.picture-200",
-        "aws_api_gateway_method_response.picture-404",
-        "aws_api_gateway_integration_response.picture-200",
-        "aws_api_gateway_integration_response.picture-404"
+        "aws_api_gateway_integration.rikishis"
     ]
     rest_api_id = "${aws_api_gateway_rest_api.rikishis.id}"
     stage_name = "test"
