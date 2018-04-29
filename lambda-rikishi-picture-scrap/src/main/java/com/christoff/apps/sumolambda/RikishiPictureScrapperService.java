@@ -90,7 +90,9 @@ public class RikishiPictureScrapperService {
 
     /**
      * This method purpose is to store the rikishi picture asIs in S3
-     *
+     * We may need someday to give permissions to files
+     * https://stackoverflow.com/a/13300444/95040
+     * For the moment it's done via policy
      * @param rikishiId the Id of the rikishi to compute image name
      */
     private void storePictureToS3(int rikishiId, Float compression, RikishiPicture result) {

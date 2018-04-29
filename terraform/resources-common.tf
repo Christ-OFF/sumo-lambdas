@@ -61,4 +61,17 @@ resource "aws_s3_bucket" "rikishis" {
     bucket = "rikishis.sumo.christoff.net"
     acl = "private"
     force_destroy = "true"
+    cors_rule {
+        allowed_headers = [ "Authorization" ]
+        allowed_methods = [ "GET"]
+        allowed_origins = [ "*"]
+        max_age_seconds = "3000"
+    }
 }
+
+# See https://stackoverflow.com/a/13300444/95040
+resource "aws_s3_bucket_policy" "rikishis" {
+    bucket = "${aws_s3_bucket.rikishis.id}"
+    policy = "${file("./policies/s3-rikishis-bucket.json")}"
+}
+
