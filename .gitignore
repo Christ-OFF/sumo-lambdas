@@ -2,3 +2,8 @@
 /*/target/
 /.idea/
 /terraform/.terraform/
+/.gradle/
+/*/build/
+/gradlew
+/gradle/
+/gradlew.bat
