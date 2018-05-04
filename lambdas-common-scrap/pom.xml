@@ -21,16 +21,15 @@
 
     <dependencies>
 
-        <!-- Spring Boot -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>spring-boot-starter-logging</artifactId>
-                    <groupId>org.springframework.boot</groupId>
-                </exclusion>
-            </exclusions>
+            <groupId>com.christoff.apps.sumo</groupId>
+            <artifactId>lambdas-common</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.christoff.apps.sumo</groupId>
+            <artifactId>scraplib</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -51,24 +50,16 @@
         </dependency>
 
         <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-log4j2</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.intellij</groupId>
-            <artifactId>annotations</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>com.christoff.apps.sumo</groupId>
-            <artifactId>lambdas-common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.christoff.apps.sumo</groupId>
-            <artifactId>scraplib</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
         </dependency>
 
     </dependencies>
@@ -76,19 +67,8 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.1</version>
-                <configuration>
-                    <!-- or whatever version you use -->
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
-                <version>${owasp.version}</version>
                 <configuration>
                     <failBuildOnCVSS>8</failBuildOnCVSS>
                     <suppressionFile>${main.basedir}/owasp-suppression.xml</suppressionFile>

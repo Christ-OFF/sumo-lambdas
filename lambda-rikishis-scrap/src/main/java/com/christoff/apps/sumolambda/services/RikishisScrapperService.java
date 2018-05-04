@@ -1,4 +1,4 @@
-package com.christoff.apps.sumolambda;
+package com.christoff.apps.sumolambda.services;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
@@ -10,8 +10,8 @@ import com.christoff.apps.sumo.lambda.ScrapperService;
 import com.christoff.apps.sumo.lambda.domain.ExtractInfo;
 import com.christoff.apps.sumo.lambda.domain.Rikishi;
 import com.christoff.apps.sumo.lambda.sns.RikishisListMethods;
-import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
@@ -28,7 +28,7 @@ import java.util.List;
 @Component
 public class RikishisScrapperService extends ScrapperService {
 
-    private static final Logger LOGGER = Logger.getLogger(RikishisScrapperService.class);
+    private static final Logger LOGGER = LogManager.getLogger(RikishisScrapperService.class);
     /**
      * There is only on extract info (is it an anti-pattern ?)
      */
@@ -39,10 +39,10 @@ public class RikishisScrapperService extends ScrapperService {
     private final Scrapper scrapper;
 
     @Autowired
-    public RikishisScrapperService(@NotNull DynamoDBMapper mapper,
-                                   @NotNull AmazonSNS sns,
-                                   @NotNull Scrapper scrapper,
-                                   @NotNull RikishisScrapParameters parameters) {
+    public RikishisScrapperService(DynamoDBMapper mapper,
+                                   AmazonSNS sns,
+                                   Scrapper scrapper,
+                                   RikishisScrapParameters parameters) {
         super(sns);
         this.mapper = mapper;
         this.parameters = parameters;

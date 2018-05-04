@@ -1,10 +1,6 @@
 # Purpose
 Provides lambda to be used by sumoport ionic app
 
-# Diagrams
-
-![Sequence Diagram](https://raw.githubusercontent.com/Christ-OFF/sumolambdas/develop/doc/SeqGlobal.png)
-
 # Run locally
 
 1. Install and run DynamoDB locally
@@ -32,15 +28,3 @@ new AwsClientBuilder.EndpointConfiguration("http://localhost:8000", "us-west-2")
 - `aws dynamodb describe-table --table-name EXTRACT_INFO`
 - `aws dynamodb describe-table --table-name RIKISHIS` 
 - `aws dynamodb describe-table --table-name RIKISHIS_PICTURES` 
-
-# Terraform
-
-## Prepare
-
-## Commands
-
-terraform workspace list
-terraform workspace new dev
-terraform init -var-file='../terraform.tfvars'
-terraform plan -var-file='../terraform.tfvars'
-terraform apply -var-file='../terraform.tfvars'
