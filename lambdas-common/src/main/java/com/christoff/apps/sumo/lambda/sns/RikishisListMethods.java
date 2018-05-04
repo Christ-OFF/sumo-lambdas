@@ -5,9 +5,8 @@ import com.amazonaws.services.sns.model.PublishResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
 
 import java.io.IOException;
@@ -19,7 +18,7 @@ import java.util.List;
  */
 public class RikishisListMethods {
 
-    private static final Logger LOGGER = Logger.getLogger(RikishisListMethods.class);
+    private static final Logger LOGGER = LogManager.getLogger(RikishisListMethods.class);
     private static final String UNABLE_TO_JSONIFY_IDS = "unable to Jsonify ids";
 
     private RikishisListMethods() {
@@ -31,7 +30,7 @@ public class RikishisListMethods {
      * @param ids may be null or emtpy
      * @return null in cas of problems
      */
-    private static @Nullable String getIdsAsJsonString(List<Integer> ids) {
+    private static String getIdsAsJsonString(List<Integer> ids) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.writeValueAsString(ids);
@@ -46,7 +45,7 @@ public class RikishisListMethods {
      * @param ids may be null or emtpy
      * @return an empty array in case of problem
      */
-    public static @NotNull List<Integer> getListIdsFromJsonString(String ids) {
+    public static List<Integer> getListIdsFromJsonString(String ids) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.readValue(ids,new TypeReference<List<Integer>>() {});

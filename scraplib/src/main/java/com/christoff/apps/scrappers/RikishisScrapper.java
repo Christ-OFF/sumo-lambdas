@@ -3,9 +3,8 @@ package com.christoff.apps.scrappers;
 import com.christoff.apps.sumo.lambda.domain.DomainObject;
 import com.christoff.apps.sumo.lambda.domain.Rikishi;
 import com.christoff.apps.utils.FilterRank;
-import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -60,7 +59,7 @@ public class RikishisScrapper implements Scrapper {
     private static final String TABLE_CELL_SELECTOR = TD;
 
 
-    private static final Logger LOGGER = Logger.getLogger(RikishisScrapper.class);
+    private static final Logger LOGGER = LogManager.getLogger(RikishisScrapper.class);
     private static final String HTML_LINK = "a";
     private static final String HREF = "href";
     /**
@@ -131,7 +130,7 @@ public class RikishisScrapper implements Scrapper {
     private boolean filterNotRetired(Elements cells) {
         Element intaiCell = cells.get(LIST_INTAI_COLUMN);
         String intaiText = intaiCell.text().replace(NBSP_JSOUP, "");
-        return intaiText == null || intaiText.isEmpty();
+        return intaiText.isEmpty();
     }
 
     /**
@@ -162,8 +161,8 @@ public class RikishisScrapper implements Scrapper {
      * @param url the riskishi url with params
      * @return the id of the rikishi or Null
      */
-    private @Nullable Integer extractIdFromURL(@NotNull String url) {
-        URL aURL = null; // URL Need a protocol + a host
+    private Integer extractIdFromURL(String url) {
+        URL aURL; // URL Need a protocol + a host
         try {
             aURL = new URL(FAKE_HOST + url);
             String query = aURL.getQuery();

@@ -1,4 +1,4 @@
-package com.christoff.apps.sumolambda;
+package com.christoff.apps.sumolambda.services;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.sns.AmazonSNS;
@@ -6,6 +6,7 @@ import com.amazonaws.services.sns.model.PublishRequest;
 import com.christoff.apps.scrappers.RikishisScrapParameters;
 import com.christoff.apps.scrappers.Scrapper;
 import com.christoff.apps.sumo.lambda.domain.Rikishi;
+import com.christoff.apps.sumolambda.services.RikishiDetailScrapperService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;

@@ -1,4 +1,4 @@
-package com.christoff.apps.sumolambda;
+package com.christoff.apps.sumolambda.services;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
@@ -8,9 +8,8 @@ import com.christoff.apps.scrappers.Scrapper;
 import com.christoff.apps.sumo.lambda.domain.RikishiPicture;
 import com.christoff.apps.sumolambda.utils.PictureOptimizer;
 import com.google.common.io.Resources;
-import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +26,7 @@ import java.nio.ByteBuffer;
 @Component
 public class RikishiPictureScrapperService {
 
-    private static final Logger LOGGER = Logger.getLogger(RikishiPictureScrapperService.class);
+    private static final Logger LOGGER = LogManager.getLogger(RikishiPictureScrapperService.class);
 
     private static final String DEFAULT_JPG = "default.jpg";
     private static final String CONTENT_TYPE = "image/jpeg";
@@ -42,8 +41,8 @@ public class RikishiPictureScrapperService {
     Scrapper scrapper;
 
     @Autowired
-    public RikishiPictureScrapperService(@NotNull AmazonS3 s3, @NotNull Scrapper scrapper,
-                                         @NotNull RikishisPicturesScrapParameters params) {
+    public RikishiPictureScrapperService(AmazonS3 s3, Scrapper scrapper,
+                                         RikishisPicturesScrapParameters params) {
         this.s3 = s3;
         this.params = params;
         this.scrapper = scrapper;
@@ -55,7 +54,6 @@ public class RikishiPictureScrapperService {
      *
      * @return the byte array of the picture, otherwise NULL
      */
-    @Nullable
     public static byte[] getDefaultRikishiPicture() {
         URL urlDefaultPicture = Resources.getResource(DEFAULT_JPG);
         try {
@@ -93,6 +91,7 @@ public class RikishiPictureScrapperService {
      * We may need someday to give permissions to files
      * https://stackoverflow.com/a/13300444/95040
      * For the moment it's done via policy
+     *
      * @param rikishiId the Id of the rikishi to compute image name
      */
     private void storePictureToS3(int rikishiId, Float compression, RikishiPicture result) {

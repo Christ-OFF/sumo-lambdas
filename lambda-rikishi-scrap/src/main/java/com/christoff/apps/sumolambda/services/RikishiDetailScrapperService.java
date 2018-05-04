@@ -1,4 +1,4 @@
-package com.christoff.apps.sumolambda;
+package com.christoff.apps.sumolambda.services;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.sns.AmazonSNS;
@@ -6,8 +6,8 @@ import com.christoff.apps.scrappers.RikishisScrapParameters;
 import com.christoff.apps.scrappers.Scrapper;
 import com.christoff.apps.sumo.lambda.ScrapperService;
 import com.christoff.apps.sumo.lambda.domain.Rikishi;
-import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class RikishiDetailScrapperService extends ScrapperService {
 
-    private static final Logger LOGGER = Logger.getLogger(RikishiDetailScrapperService.class);
+    private static final Logger LOGGER = LogManager.getLogger(RikishiDetailScrapperService.class);
 
     private final
     DynamoDBMapper mapper;
@@ -31,8 +31,8 @@ public class RikishiDetailScrapperService extends ScrapperService {
     Scrapper scrapper;
 
     @Autowired
-    public RikishiDetailScrapperService(@NotNull DynamoDBMapper mapper, @NotNull AmazonSNS sns, @NotNull Scrapper scrapper,
-                                        @NotNull RikishisScrapParameters parameters) {
+    public RikishiDetailScrapperService(DynamoDBMapper mapper, AmazonSNS sns, Scrapper scrapper,
+                                        RikishisScrapParameters parameters) {
         super(sns);
         this.mapper = mapper;
         this.parameters = parameters;

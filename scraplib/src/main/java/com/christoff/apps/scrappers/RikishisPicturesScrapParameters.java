@@ -1,17 +1,17 @@
 package com.christoff.apps.scrappers;
 
-import org.apache.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * The necessary properties to scrap rikishis pictures
  */
 public class RikishisPicturesScrapParameters {
 
-    public static final Float DEFAULT_QUALITY = 0.3F;
+    private static final Float DEFAULT_QUALITY = 0.3F;
 
     public static final String DEFAULT_PICS_PATH = "pics/";
-    private static final Logger LOGGER = Logger.getLogger(RikishisPicturesScrapParameters.class);
+    private static final Logger LOGGER = LogManager.getLogger(RikishisPicturesScrapParameters.class);
     /**
      * Should be http://sumodb.sumogames.de/ in production
      */
@@ -69,28 +69,28 @@ public class RikishisPicturesScrapParameters {
             builded.quality = DEFAULT_QUALITY;
         }
 
-        public Builder withBaseUrl(@Nullable String url) {
+        public Builder withBaseUrl(String url) {
             if (url != null && !url.isEmpty()) {
                 builded.baseurl = url;
             }
             return this;
         }
 
-        public Builder withImageUrl(@Nullable String url) {
+        public Builder withImageUrl(String url) {
             if (url != null && !url.isEmpty()) {
                 builded.imageurl = url;
             }
             return this;
         }
 
-        public Builder withBucket(@Nullable String bucket) {
+        public Builder withBucket(String bucket) {
             if (bucket != null && !bucket.isEmpty()) {
                 builded.bucket = bucket;
             }
             return this;
         }
 
-        public Builder withQuality(@Nullable String paramQuality) {
+        public Builder withQuality(String paramQuality) {
             if (paramQuality != null && !paramQuality.isEmpty()) {
                 Float quality = DEFAULT_QUALITY;
                 try {

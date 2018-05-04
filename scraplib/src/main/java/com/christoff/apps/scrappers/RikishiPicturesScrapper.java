@@ -1,8 +1,8 @@
 package com.christoff.apps.scrappers;
 
 import com.christoff.apps.sumo.lambda.domain.RikishiPicture;
-import org.apache.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -21,7 +21,7 @@ public class RikishiPicturesScrapper implements Scrapper {
     private static final String IMAGE_EXTENSION = ".jpg";
     public static final String FAKE_HOST = "http://0.0.0.0/";
 
-    private static final Logger LOGGER = Logger.getLogger(RikishiPicturesScrapper.class);
+    private static final Logger LOGGER = LogManager.getLogger(RikishiPicturesScrapper.class);
 
     private RikishisPicturesScrapParameters scrapParameters;
 
@@ -42,11 +42,11 @@ public class RikishiPicturesScrapper implements Scrapper {
     /**
      * Retrieve on image may unimplemented as pictures are not always available
      * ex: yes for rikishis, no or maybe ate best for fights, bashos, ...
+     *
      * @param id the id of the image
      */
     @Override
-    public @Nullable
-    RikishiPicture getDetail(Integer id) {
+    public RikishiPicture getDetail(Integer id) {
         String downloadUrl = scrapParameters.getFullImageUrl() + id + IMAGE_EXTENSION;
         try {
             byte[] imageBytes = getImageBytes(new URL(downloadUrl));
@@ -65,10 +65,11 @@ public class RikishiPicturesScrapper implements Scrapper {
 
     /**
      * Load image bytes from the source website (so beware of exceptions)
+     *
      * @param downloadURL is URL of the image
      * @return the byte array of the image, can be NULL
      */
-    protected @Nullable byte[] getImageBytes(URL downloadURL) {
+    private byte[] getImageBytes(URL downloadURL) {
         try (InputStream in = new BufferedInputStream(downloadURL.openStream())) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             byte[] buf = new byte[1024];
@@ -77,7 +78,6 @@ public class RikishiPicturesScrapper implements Scrapper {
                 out.write(buf, 0, n);
             }
             out.close();
-            in.close();
             return out.toByteArray();
         } catch (IOException ioe) {
             LOGGER.warn("Unable to download image from " + downloadURL.toString());

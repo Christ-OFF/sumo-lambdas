@@ -1,7 +1,5 @@
 package com.christoff.apps.sumolambda.utils;
 
-import org.jetbrains.annotations.NotNull;
-
 import javax.imageio.*;
 import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
@@ -57,7 +55,6 @@ public class PictureOptimizer {
      * @param imageWriter the source writer
      * @return the paramters to apply
      */
-    @NotNull
     private static ImageWriteParam getImageWriteParam(ImageWriter imageWriter, Float quality) {
         ImageWriteParam imageWriteParam = imageWriter.getDefaultWriteParam();
         imageWriteParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
@@ -71,7 +68,6 @@ public class PictureOptimizer {
      * @param bais the inputstream of the jpg to read
      * @return an JPEG Image reader
      */
-    @NotNull
     private static ImageReader getImageReader(ByteArrayInputStream bais) {
         MemoryCacheImageInputStream cache = new MemoryCacheImageInputStream(bais);
         Iterator<ImageReader> readerIterator = ImageIO.getImageReadersByFormatName(IMAGE_FORMAT);

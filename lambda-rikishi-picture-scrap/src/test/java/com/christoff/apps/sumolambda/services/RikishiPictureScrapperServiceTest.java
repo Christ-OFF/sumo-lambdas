@@ -1,10 +1,9 @@
-package com.christoff.apps.sumolambda;
+package com.christoff.apps.sumolambda.services;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.christoff.apps.scrappers.RikishisPicturesScrapParameters;
 import com.christoff.apps.scrappers.Scrapper;
 import com.christoff.apps.sumo.lambda.domain.RikishiPicture;
-import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -39,7 +38,7 @@ class RikishiPictureScrapperServiceTest {
     public void should_save_picture() {
         // Given
         Mockito.when(scrapper.getDetail(FAKE_NUMBER)).thenReturn(null);
-        @Nullable byte[] defaultPicture = tested.getDefaultRikishiPicture();
+        byte[] defaultPicture = RikishiPictureScrapperService.getDefaultRikishiPicture();
         assertNotNull(defaultPicture, "Can't test without default picture");
         RikishiPicture expectedPicture = new RikishiPicture();
         expectedPicture.setId(FAKE_NUMBER);

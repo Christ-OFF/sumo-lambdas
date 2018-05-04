@@ -2,17 +2,17 @@ package com.christoff.apps.sumo.lambda;
 
 import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.model.PublishResult;
-import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.util.Assert;
 
 public abstract class ScrapperService {
 
-    private static final Logger LOGGER = Logger.getLogger(ScrapperService.class);
+    private static final Logger LOGGER = LogManager.getLogger(ScrapperService.class);
 
     protected final AmazonSNS sns;
 
-    public ScrapperService(@NotNull AmazonSNS sns) {
+    public ScrapperService(AmazonSNS sns) {
         this.sns = sns;
     }
 

@@ -1,7 +1,6 @@
 package com.christoff.apps.sumolambda.utils;
 
-import com.christoff.apps.sumolambda.RikishiPictureScrapperService;
-import org.jetbrains.annotations.NotNull;
+import com.christoff.apps.sumolambda.services.RikishiPictureScrapperService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -14,8 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PictureOptimizerTest {
 
-    @NotNull
-    static Stream<Arguments> twoQualitiesProvider() {
+    private static Stream<Arguments> twoQualitiesProvider() {
         return Stream.of(
             Arguments.of(0.1F, 0.2F),
             Arguments.of(0.2F, 0.3F),

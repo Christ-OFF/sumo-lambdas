@@ -1,8 +1,5 @@
 package com.christoff.apps.scrappers;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 /**
  * The necessary properties to scrap rikishis
  * 4 parameters for source
@@ -16,7 +13,7 @@ public class RikishisScrapParameters implements ScrapPublishParameters {
     public static final String DEFAULT_BASE_URL = "http://sumodb.sumogames.de/";
     public static final String DEFAULT_LIST_QUERY = "Rikishi.aspx?shikona=&heya=-1&shusshin=-1&b=-1&high=-1&hd=-1&entry=-1&intai=999999&sort=1";
     public static final String DEFAULT_RIKISHI_QUERY = "Rikishi.aspx?r=";
-    public static final String DEFAULT_EXTRACTONLY = "false";
+    private static final String DEFAULT_EXTRACTONLY = "false";
 
     /**
      * Should be http://sumodb.sumogames.de/ in production
@@ -72,7 +69,7 @@ public class RikishisScrapParameters implements ScrapPublishParameters {
         /**
          * Parameters cannot be made null as this is useless !
          */
-        public Builder(@NotNull String publishDetailTopic, @NotNull String publishPictureTopic) {
+        public Builder(String publishDetailTopic, String publishPictureTopic) {
             builded = new RikishisScrapParameters();
             builded.baseurl = DEFAULT_BASE_URL;
             builded.listurl = DEFAULT_LIST_QUERY;
@@ -83,28 +80,28 @@ public class RikishisScrapParameters implements ScrapPublishParameters {
             builded.publishPictureTopic = publishPictureTopic;
         }
 
-        public Builder withBaseUrl(@Nullable String url) {
+        public Builder withBaseUrl(String url) {
             if (url != null && !url.isEmpty()) {
                 builded.baseurl = url;
             }
             return this;
         }
 
-        public Builder withListUrl(@Nullable String url) {
+        public Builder withListUrl(String url) {
             if (url != null && !url.isEmpty()) {
                 builded.listurl = url;
             }
             return this;
         }
 
-        public Builder withRikishiUrl(@Nullable String url) {
+        public Builder withRikishiUrl(String url) {
             if (url != null && !url.isEmpty()) {
                 builded.rikishiurl = url;
             }
             return this;
         }
 
-        public Builder withextractInfoOnly(@Nullable String extractInfoOnly) {
+        public Builder withextractInfoOnly(String extractInfoOnly) {
             if (extractInfoOnly != null && !extractInfoOnly.isEmpty()) {
                 builded.extractInfoOnly = extractInfoOnly;
             }

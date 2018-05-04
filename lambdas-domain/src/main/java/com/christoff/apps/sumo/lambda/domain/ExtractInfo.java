@@ -6,8 +6,10 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
 /**
  * Stores information about the extract process
- * For the moment extractdate
- * TODO Add number of rikishis
+ * This domain does NOT respect hexagonal architecture requirements !
+ * I should not put infra into domain
+ * So ...
+ * TODO remove dynamoDb intrusion
  * Created by christophe on 14.06.17.
  */
 @DynamoDBTable(tableName = "EXTRACT_INFO")

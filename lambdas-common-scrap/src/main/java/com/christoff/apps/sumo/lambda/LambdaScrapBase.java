@@ -2,8 +2,8 @@ package com.christoff.apps.sumo.lambda;
 
 import com.amazonaws.services.lambda.runtime.events.SNSEvent;
 import com.christoff.apps.sumo.lambda.sns.RikishisListMethods;
-import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,12 +12,12 @@ import java.util.List;
 /**
  * We have some common methods to all lambdas : at least connect to dynamoDB
  */
-public abstract class LambdaScrapBase extends LambdaBase {
+public abstract class LambdaScrapBase {
 
-    private static final Logger LOGGER = Logger.getLogger(LambdaScrapBase.class);
+    private static final Logger LOGGER = LogManager.getLogger(LambdaScrapBase.class);
 
-    protected static final String PUBLISH_DETAIL_TOPIC = "publishdetailtopic";
-    protected static final String PUBLISH_PICTURE_TOPIC = "publishpicturetopic";
+    public static final String PUBLISH_DETAIL_TOPIC = "publishdetailtopic";
+    public static final String PUBLISH_PICTURE_TOPIC = "publishpicturetopic";
 
     /**
      * Common method with heavy null checks to extract id from message
@@ -25,8 +25,7 @@ public abstract class LambdaScrapBase extends LambdaBase {
      * @param event message containing raw id
      * @return id or NULL
      */
-    protected @NotNull
-    List<Integer> getRikishiIdFromEvent(SNSEvent event) {
+    protected List<Integer> getRikishiIdFromEvent(SNSEvent event) {
         if (event == null
             || event.getRecords() == null
             || event.getRecords().isEmpty()
