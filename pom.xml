@@ -29,9 +29,7 @@
 
         <aws-java-sdk.version>1.11.320</aws-java-sdk.version>
         <junit.jupiter.version>5.2.0</junit.jupiter.version>
-
-        <!-- Current AWS versions rely on this version (not the lastest) -->
-        <jackson.version>2.9.8</jackson.version>
+        <jackson.version>2.9.9</jackson.version>
     </properties>
 
     <dependencyManagement>
