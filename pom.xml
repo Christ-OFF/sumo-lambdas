@@ -28,7 +28,7 @@
         <main.basedir>${project.basedir}</main.basedir>
 
         <aws-java-sdk.version>1.11.320</aws-java-sdk.version>
-        <junit.jupiter.version>5.2.0</junit.jupiter.version>
+        <junit.jupiter.version>5.4.2</junit.jupiter.version>
         <jackson.version>2.9.9</jackson.version>
     </properties>
 
